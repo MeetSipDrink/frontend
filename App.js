@@ -5,11 +5,11 @@ import HomePage from './src/pages/auth-management-pages/HomePage/HomePage'; // í
 import LoginPage from './src/pages/auth-management-pages/LoginPage/LoginPage';
 import SignUpFormPage from "./src/pages/auth-management-pages/SignUpFormPage/SignUpFormPage";
 import SignUpAgreementPage from "./src/pages/auth-management-pages/SignUpAgreementPage/SignUpAgreementPage";
-import MyPage from "./src/pages/profile-management-pages /MyPage/MyPage";
-import FriendListPage from "./src/pages/profile-management-pages /FriendListPage/FriendListPage";
-import FriendRequestPage from "./src/pages/profile-management-pages /FriendRequestPage/FriendRequestPage";
-import BlockListPage from "./src/pages/profile-management-pages /BlockListPage/BlockListPage";
-import ProfileEditorPage from "./src/pages/profile-management-pages /ProfileEditorPage/ProfileEditorPage";
+import MyPage from "./src/pages/profile-management-pages/MyPage/MyPage";
+import FriendListPage from "./src/pages/profile-management-pages/FriendListPage/FriendListPage";
+import FriendRequestPage from "./src/pages/profile-management-pages/FriendRequestPage/FriendRequestPage";
+import BlockListPage from "./src/pages/profile-management-pages/BlockListPage/BlockListPage";
+import ProfileEditorPage from "./src/pages/profile-management-pages/ProfileEditorPage/ProfileEditorPage";
 import BoardEditPage from "./src/pages/board-system-pages/BoardEditPage/BoardEditPage";
 import BoardPostPage from "./src/pages/board-system-pages/BoardPostPage/BoardPostPage";
 import BoardViewPage from "./src/pages/board-system-pages/BoardViewPage/BoardViewPage";
