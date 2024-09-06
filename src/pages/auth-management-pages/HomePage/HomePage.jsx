@@ -1,13 +1,20 @@
 import React from 'react';
-import { View, Text, Button, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; // 네비게이션 훅 추가
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import Homeimage from '../../../assets/images/Homeimage.png';
+import homeB1 from '../../../assets/images/homeB1.png';
+import homeB2 from '../../../assets/images/homeB2.png';
+import homeBot from '../../../assets/images/homeBot.png';
+import homeC from '../../../assets/images/homeC.png';
+import homeN from '../../../assets/images/homeN.png';
+import homeR from '../../../assets/images/homeR.png';
+import homeV from '../../../assets/images/homeV.png';
 
 export default function HomePage() {
-    const navigation = useNavigation(); // 네비게이션 객체 사용
+    const navigation = useNavigation();
 
     return (
-
-        <View style={styles.container}>
+        <ScrollView contentContainerStyle={styles.container}>
 
             {/* 헤더 영역 */}
             <View style={styles.header}>
@@ -17,52 +24,79 @@ export default function HomePage() {
                 </TouchableOpacity>
             </View>
 
-            {/* 이미지 영역 */}
+            {/* 메인 이미지 영역 */}
             <View style={styles.mainImageContainer}>
-                <Image source={require('/Users/gimchanjun/Desktop/MeetSipDrink/frontend/src/assets/images/image 24.png')}
-                       style={styles.mainImage} />
+                <Image source={Homeimage} style={styles.mainImage} />
             </View>
 
             {/* 기능 버튼들 */}
             <View style={styles.buttonRow1}>
-                <TouchableOpacity style={[styles.featureButton,  { flex: 1 }]} onPress={() => navigation.navigate('VideoChat')}>
+                {/* 화상채팅 버튼 */}
+                <TouchableOpacity style={[styles.featureButton, { flex: 1 }]} onPress={() => navigation.navigate('VideoChat')}>
                     <View style={styles.leftTextContainer}>
                         <Text style={styles.buttonText}>화상채팅하러가기</Text>
                         <Text style={styles.buttonText}>오늘 나의 술친구는 누굴까?</Text>
                     </View>
-                    <Text style={styles.imageText}>이미지</Text>
+                    <View style={styles.rightTextContainer}>
+                        <Image source={homeV} style={styles.mainIcon} />
+                    </View>
                 </TouchableOpacity>
 
-                <TouchableOpacity style={[styles.featureButton,  { flex: 1 }]}  onPress={() => navigation.navigate('ChatRoomList')}>
+                {/* 채팅 버튼 */}
+                <TouchableOpacity style={[styles.featureButton, { flex: 1 }]} onPress={() => navigation.navigate('ChatRoomList')}>
                     <View style={styles.leftTextContainer}>
                         <Text style={styles.buttonText}>채팅하러 가기</Text>
                         <Text style={styles.buttonText}>체팅으로도 충분히 재밌으니까</Text>
                     </View>
-                    <Text style={styles.imageText}>이미지</Text>
+                    <View style={styles.rightTextContainer}>
+                        <Image source={homeC} style={styles.mainIcon} />
+                    </View>
                 </TouchableOpacity>
             </View>
 
             {/* 3개의 버튼을 한 줄에 배치 */}
             <View style={styles.buttonRow2}>
+                {/* 게시판 버튼 */}
                 <TouchableOpacity style={[styles.subFeatureButton, { flex: 2 }]} onPress={() => navigation.navigate('BoardList')}>
-                    <Text style={styles.buttonText}>오늘의 술상 자랑</Text>
+                    <View style={styles.iconContainer}>
+                        <Image source={homeB2} style={styles.mainIcon} />
+                        <Image source={homeB1} style={styles.mainIcon} />
+                    </View>
                 </TouchableOpacity>
+
+                {/* 룰렛 버튼 */}
                 <TouchableOpacity style={[styles.subFeatureButton, { flex: 1 }]} onPress={() => navigation.navigate('Roulette')}>
-                    <Text style={styles.buttonText}>안주 룰렛</Text>
+                    <View style={styles.singleIconContainer}>
+                        <Image source={homeR} style={styles.mainIcon} />
+                    </View>
                 </TouchableOpacity>
+
+                {/* 공지사항 버튼 */}
                 <TouchableOpacity style={[styles.subFeatureButton, { flex: 2 }]} onPress={() => navigation.navigate('NoticeList')}>
-                    <Text style={styles.buttonText}>공지사항</Text>
+                    <View style={styles.singleIconContainer}>
+                        <Image source={homeN} style={styles.mainIcon} />
+                    </View>
                 </TouchableOpacity>
             </View>
 
-            <View style={styles.buttonRow3} >
-                <TouchableOpacity style={styles.subFeatureButton} onPress={() => navigation.navigate('UserSearchList')}>
-                    <Text style={styles.buttonText}>유저 검색</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.subFeatureButton} onPress={() => navigation.navigate('BotResponse')}>
-                    <Text style={styles.buttonText}>응답 봇</Text>
-                </TouchableOpacity>
+            {/* 텍스트 설명 */}
+            <View style={styles.buttonRow2Text}>
+                <Text style={styles.textItem}>오늘의 술상 자랑</Text>
+                <Text style={styles.textItemSmall}>안주 룰렛</Text>
+                <Text style={styles.textItem}>공지 사항</Text>
+            </View>
 
+            {/* 하단 버튼들 */}
+            <View style={styles.buttonRow3}>
+                <TouchableOpacity style={styles.botButton} onPress={() => navigation.navigate('ReportList')}>
+                    <Text style={styles.buttonText}>신고 게시판(관리자)(임시)</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.botButton} onPress={() => navigation.navigate('UserSearchList')}>
+                    <Text style={styles.buttonText}>유저 검색(임시)</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.botButton} onPress={() => navigation.navigate('BotResponse')}>
+                    <Image source={homeBot} style={styles.mainIcon} />
+                </TouchableOpacity>
             </View>
 
             {/* 하단 네비게이션 */}
@@ -88,25 +122,20 @@ export default function HomePage() {
                     <Text style={styles.navItem}>마이 페이지</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
-        backgroundColor: '#f8f8f8',
-    },
-    scrollContainer: {
         flexGrow: 1,
-        justifyContent: 'space-between',
+        backgroundColor: '#ffffff',
     },
     header: {
-        marginTop: 30,
-        height: '11.4%',
+        height: '10%',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        padding: 20,
+        padding: 15,
         alignItems: 'center',
         backgroundColor: '#ffffff',
         borderBottomWidth: 1,
@@ -118,27 +147,31 @@ const styles = StyleSheet.create({
         color: '#333',
     },
     loginButton: {
-        backgroundColor: '#FF6347',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
     },
     loginText: {
-        color: '#fff',
-        fontSize: 16,
+        color: '#000000',
+        fontSize: 19,
     },
     mainImageContainer: {
         height: '35%',
         alignItems: 'center',
         justifyContent: 'center',
-        marginTop: 20,
+        marginTop: 10,
     },
     mainImage: {
-        width: 500,
         flex: 1,
+        borderRadius: 10,
+    },
+    mainIcon: {
+        width: 40,  // 아이콘 크기 설정
+        height: 40,
+        margin: 5,  // 아이콘 간 간격
     },
     buttonRow1: {
-        height: '18%',
+        height: '15%',
         flexDirection: 'row',
         justifyContent: 'center',
         marginVertical: 10,
@@ -148,42 +181,74 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'flex-start',
     },
-    imageText: {
-        justifyContent: 'center',
+    rightTextContainer: {
+        flex: 1,
         alignItems: 'flex-end',
-        fontSize: 16,
-        color: '#fff',
+        justifyContent: 'center',
     },
     buttonRow2: {
         height: '9%',
         flexDirection: 'row',
         justifyContent: 'center',
+        paddingHorizontal: 20,
+    },
+    iconContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',  // 아이콘들을 가로 중앙에 배치
+    },
+    singleIconContainer: {
+        justifyContent: 'center',  // 이미지가 중앙 정렬되도록
+        alignItems: 'center',
+    },
+    buttonRow2Text: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
         marginVertical: 10,
         paddingHorizontal: 20,
+    },
+    textItem: {
+        width: '40%',
+        textAlign: 'center',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    textItemSmall: {
+        width: '20%',
+        textAlign: 'center',
+        fontSize: 14,
+        fontWeight: 'bold',
     },
     buttonRow3: {
-        height: '5%',
+        height: '8%',
         flexDirection: 'row',
         justifyContent: 'flex-end',
-        marginVertical: 10,
-        paddingHorizontal: 20,
+        marginVertical: 5,
+        paddingHorizontal: 10,
     },
     featureButton: {
-        backgroundColor: '#FF6347',
+        backgroundColor: '#F8F8F8',
         padding: 15,
         borderRadius: 5,
         marginHorizontal: 5,
-        flexDirection: 'row',
     },
     subFeatureButton: {
-        backgroundColor: '#FFAD60',
+        backgroundColor: '#F8F8F8',
+        padding: 15,
+        borderRadius: 5,
+        marginHorizontal: 5,
+        alignItems: 'center',   // 자식 요소가 가로 중앙으로 오도록 설정
+        justifyContent: 'center',  // 자식 요소가 세로 중앙으로 오도록 설정
+    },
+    botButton: {
         padding: 15,
         borderRadius: 5,
         marginHorizontal: 5,
     },
     buttonText: {
-        color: '#fff',
-        fontSize: 16,
+        color: '#000000',
+        fontSize: 13,
         textAlign: 'left',
     },
     bottomNavigation: {
