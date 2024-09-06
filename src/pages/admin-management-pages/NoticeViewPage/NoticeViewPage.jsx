@@ -8,7 +8,7 @@ export default function NoticeViewPage({navigation}) {
         <Text style={styles.buttonText}>공지사항 리스트(뒤로가기)</Text>
     </TouchableOpacity>
             <TouchableOpacity style={styles.Button} onPress={() => navigation.navigate('NoticeEdit')}>
-                <Text style={styles.buttonText}>게시판 수정</Text>
+                <Text style={styles.buttonText}>게시판 수정(관리자)</Text>
             </TouchableOpacity>
         <TouchableOpacity style={styles.Button} onPress={() => navigation.navigate('Home')}>
             <Text style={styles.buttonText}>홈으로</Text>

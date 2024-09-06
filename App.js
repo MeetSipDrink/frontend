@@ -20,10 +20,14 @@ import VideoChatPage from "./src/pages/communication-tools-pages/VideoChatPage/V
 import RoulettePage from "./src/pages/extra-features-pages/RoulettePage/RoulettePage";
 import BotResponsePage from "./src/pages/extra-features-pages/BotResponsePage/BotResponsePage";
 import UserSearchListPage from "./src/pages/extra-features-pages/UserSearchListPage/UserSearchListPage";
-import NoticeListPage from "./src/pages/extra-features-pages/NoticeListPage/NoticeListPage";
-import NoticePostPage from "./src/pages/extra-features-pages/NoticePostPage/NoticePostPage";
-import NoticeViewPage from "./src/pages/extra-features-pages/NoticeViewPage/NoticeViewPage";
-import NoticeEditPage from "./src/pages/extra-features-pages/NoticeEditPage/NoticeEditPage"; // 로그인 페이지 경로
+import NoticeListPage from "./src/pages/admin-management-pages/NoticeListPage/NoticeListPage";
+import NoticePostPage from "./src/pages/admin-management-pages/NoticePostPage/NoticePostPage";
+import NoticeViewPage from "./src/pages/admin-management-pages/NoticeViewPage/NoticeViewPage";
+import NoticeEditPage from "./src/pages/admin-management-pages/NoticeEditPage/NoticeEditPage";
+import ChatRoomEditPage from "./src/pages/communication-tools-pages/ChatRoomEditPage/ChatRoomEditPage";
+import ReportListPage from "./src/pages/admin-management-pages/ReportListPage/ReportListPage";
+import TestChatBotExample from "./src/pages/TestPage/TestChatBotExample";
+import TestListPage from "./src/pages/TestPage/TestListPage"; // 로그인 페이지 경로
 
 // Stack Navigator 생성
 const Stack = createStackNavigator();
@@ -91,6 +95,10 @@ export default function App() {
                     component={ChatRoomListPage}
                     options={{ headerShown: false }}/>
                 <Stack.Screen
+                    name="ChatRoomEdit"
+                    component={ChatRoomEditPage}
+                    options={{ headerShown: false }}/>
+                <Stack.Screen
                     name="ChatRoom"
                     component={ChatRoomPage}
                     options={{ headerShown: false }}/>
@@ -126,6 +134,11 @@ export default function App() {
                     name="NoticeEdit"
                     component={NoticeEditPage}
                     options={{ headerShown: false }}/>
+                <Stack.Screen
+                    name="ReportList"
+                    component={ReportListPage}
+                    options={{ headerShown: false }}/>
+
             </Stack.Navigator>
         </NavigationContainer>
     );
