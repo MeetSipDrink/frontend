@@ -1,7 +1,6 @@
-// src/screens/Homeimg.js
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Image, StyleSheet, TouchableOpacity, Animated, Dimensions } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';  // 아이콘 라이브러리 추가
+import { View, Image, StyleSheet, Animated, Dimensions } from 'react-native';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import main1 from '../../../../assets/mainimg/1.png';
 import main2 from '../../../../assets/mainimg/2.png';
 import main3 from '../../../../assets/mainimg/3.png';
@@ -11,94 +10,92 @@ import main6 from '../../../../assets/mainimg/6.png';
 import main7 from '../../../../assets/mainimg/7.png';
 import main8 from '../../../../assets/mainimg/8.png';
 
-const { width } = Dimensions.get('window');  // 화면의 가로 길이를 가져옴
+const { width, height } = Dimensions.get('window'); // 화면의 너비와 높이 가져오기
 
-const AutoImageChanger = () => {
+const images = [main1, main2, main3, main4, main5, main6, main7, main8];
+
+const Homeimg = ({ slideInterval = 3000 }) => {
     const [imageIndex, setImageIndex] = useState(0);
-    const images = [main1, main2, main3, main4, main5, main6, main7, main8];
-
     const slideAnim = useRef(new Animated.Value(0)).current;
-    const [isAnimating, setIsAnimating] = useState(false);
+    const intervalRef = useRef(null);
 
     useEffect(() => {
-        const interval = setInterval(() => {
-            slideImage('next');
-        }, 3000); // 3초마다 이미지 변경
+        startAutoSlide();
+        return () => stopAutoSlide();
+    }, []);
 
-        return () => clearInterval(interval);
-    }, [imageIndex]);
+    // 자동 슬라이드 시작
+    const startAutoSlide = () => {
+        stopAutoSlide(); // 중복 슬라이드 방지
+        intervalRef.current = setInterval(() => goToNextImage(), slideInterval);
+    };
 
-    const updateImageIndex = (prevIndex, direction) => {
-        if (direction === 'next') {
-            return (prevIndex + 1) % images.length;
-        } else {
-            return (prevIndex - 1 + images.length) % images.length;
+    // 자동 슬라이드 중지
+    const stopAutoSlide = () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
         }
     };
 
+    // 이미지 슬라이드 처리
     const slideImage = (direction) => {
-        if (isAnimating) return;
-        setIsAnimating(true);
-
-        let toValue = direction === 'next' ? -width : width;
-
+        const toValue = direction === 'next' ? -width : width;
         Animated.timing(slideAnim, {
             toValue,
             duration: 500,
             useNativeDriver: true,
         }).start(() => {
-            setImageIndex((prevIndex) => updateImageIndex(prevIndex, direction));
-
+            setImageIndex((prevIndex) =>
+                direction === 'next'
+                    ? (prevIndex + 1) % images.length
+                    : (prevIndex - 1 + images.length) % images.length
+            );
             slideAnim.setValue(0);
-            setIsAnimating(false);
         });
+    };
+
+    // 다음 이미지로 이동
+    const goToNextImage = () => slideImage('next');
+    // 이전 이미지로 이동
+    const goToPrevImage = () => slideImage('prev');
+
+    // 스와이프 이벤트 처리
+    const onHandlerStateChange = (event) => {
+        if (event.nativeEvent.state === State.END) {
+            const { translationX } = event.nativeEvent;
+            if (translationX < -width / 4) {
+                goToNextImage();
+            } else if (translationX > width / 4) {
+                goToPrevImage();
+            } else {
+                Animated.spring(slideAnim, {
+                    toValue: 0,
+                    useNativeDriver: true,
+                }).start();
+            }
+            startAutoSlide();
+        } else if (event.nativeEvent.state === State.BEGAN) {
+            stopAutoSlide();
+        }
     };
 
     return (
         <View style={styles.mainImageContainer}>
-            <Animated.View
-                style={[
-                    styles.imageRow,
-                    { transform: [{ translateX: slideAnim }] },
-                ]}
-            >
-                <View style={styles.imageWrapper}>
-                    <Image source={images[(imageIndex - 1 + images.length) % images.length]} style={styles.image} />
-                </View>
-                <View style={styles.imageWrapper}>
-                    <Image source={images[imageIndex]} style={styles.image} />
-                </View>
-                <View style={styles.imageWrapper}>
-                    <Image source={images[(imageIndex + 1) % images.length]} style={styles.image} />
-                </View>
-            </Animated.View>
-
-            {/* 이전 버튼 */}
-            <TouchableOpacity style={styles.prevButton} onPress={() => slideImage('prev')}>
-                <Ionicons name="chevron-back-outline" size={24} color="#ffffff" />
-            </TouchableOpacity>
-
-            {/* 다음 버튼 */}
-            <TouchableOpacity style={styles.nextButton} onPress={() => slideImage('next')}>
-                <Ionicons name="chevron-forward-outline" size={24} color="#ffffff" />
-            </TouchableOpacity>
-        </View>
-    );
-};
-
-const Homeimg = () => {
-    return (
-        <View style={styles.container}>
-            <AutoImageChanger />
+            <PanGestureHandler onHandlerStateChange={onHandlerStateChange}>
+                <Animated.View style={[styles.imageRow, { transform: [{ translateX: slideAnim }] }]}>
+                    <View style={styles.imageWrapper}>
+                        <Image source={images[imageIndex]} style={styles.image} />
+                    </View>
+                    <View style={styles.imageWrapper}>
+                        <Image source={images[(imageIndex + 1) % images.length]} style={styles.image} />
+                    </View>
+                </Animated.View>
+            </PanGestureHandler>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        backgroundColor: '#ffffff',
-        alignItems: 'center',
-    },
     mainImageContainer: {
         height: 300,
         width: '100%',
@@ -108,35 +105,18 @@ const styles = StyleSheet.create({
     },
     imageRow: {
         flexDirection: 'row',
-        width: width * 3,
+        width: width * 2, // 너비를 두 배로 설정하여 두 개의 이미지를 나란히 배치
     },
     imageWrapper: {
         width: width,
-        height: '100%',
+        height: 300, // 높이를 명시적으로 지정
         justifyContent: 'center',
         alignItems: 'center',
     },
     image: {
         width: '100%',
         height: '100%',
-        borderRadius: 10,
-        resizeMode: 'contain',
-    },
-    prevButton: {
-        position: 'absolute',
-        left: 10,
-        top: '40%',
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
-        padding: 10,
-        borderRadius: 5,
-    },
-    nextButton: {
-        position: 'absolute',
-        right: 10,
-        top: '40%',
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
-        padding: 10,
-        borderRadius: 5,
+        resizeMode: 'contain', // 이미지가 화면에 맞게 조정됨
     },
 });
 
