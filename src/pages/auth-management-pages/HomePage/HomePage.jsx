@@ -9,15 +9,14 @@ import homeN from '../../../assets/images/homeN.png';
 import homeR from '../../../assets/images/homeR.png';
 import homeV from '../../../assets/images/homeV.png';
 import ChatBotExample from "./Bot/ChatBotExample";  // 챗봇 예시 컴포넌트 불러오기
-import Icon from "react-native-vector-icons/Ionicons";  // 아이콘 라이브러리 불러오기
-import SlotMachine from "../../extra-features-pages/BotResponsePage/BotResponsePage";  // SlotMachine 컴포넌트 추가
+import Icon from "react-native-vector-icons/Ionicons";
+import SlotMachine from "../../extra-features-pages/BotResponsePage/BotResponsePage";  // 아이콘 라이브러리 불러오기
 
 export default function HomePage() {
     const navigation = useNavigation();  // 네비게이션 훅 사용
 
     return (
-        <View style={styles.container}>
-            {/* 고정된 헤더 영역 */}
+        <ScrollView contentContainerStyle={styles.container}>
             <View style={styles.header}>
                 <Text style={styles.headerText}>한마디 한 잔</Text>
                 <TouchableOpacity style={styles.loginButton} onPress={() => navigation.navigate('Login')}>
@@ -25,73 +24,65 @@ export default function HomePage() {
                 </TouchableOpacity>
             </View>
 
-            {/* 스크롤 가능한 콘텐츠 */}
-            <ScrollView contentContainerStyle={styles.scrollContainer}>
-                {/* SlotMachine 컴포넌트를 헤더와 메인 이미지 사이에 배치 */}
-                <View style={styles.slotMachineContainer}>
-                    <SlotMachine />
-                </View>
+            {/* 메인 이미지 컴포넌트 */}
+            <Homeimg />
 
-                {/* 메인 이미지 컴포넌트 */}
-                <Homeimg />
+            {/* 주요 기능 버튼들 */}
+            <View style={styles.buttonRow1}>
+                <TouchableOpacity style={[styles.featureButton, { flex: 1 }]} onPress={() => navigation.navigate('VideoChat')}>
+                    <View style={styles.leftTextContainer}>
+                        <Text style={styles.buttonText}>화상채팅하러가기</Text>
+                        <Text style={styles.buttonText}>오늘 나의 술친구는 누굴까?</Text>
+                    </View>
+                    <View style={styles.rightTextContainer}>
+                        <Image source={homeV} style={styles.mainIcon} />
+                    </View>
+                </TouchableOpacity>
 
-                {/* 주요 기능 버튼들 */}
-                <View style={styles.buttonRow1}>
-                    <TouchableOpacity style={[styles.featureButton, { flex: 1 }]} onPress={() => navigation.navigate('VideoChat')}>
-                        <View style={styles.leftTextContainer}>
-                            <Text style={styles.buttonText}>화상채팅하러가기</Text>
-                            <Text style={styles.buttonText}>오늘 나의 술친구는 누굴까?</Text>
-                        </View>
-                        <View style={styles.rightTextContainer}>
-                            <Image source={homeV} style={styles.mainIcon} />
-                        </View>
-                    </TouchableOpacity>
+                <TouchableOpacity style={[styles.featureButton, { flex: 1 }]} onPress={() => navigation.navigate('ChatRoomList')}>
+                    <View style={styles.leftTextContainer}>
+                        <Text style={styles.buttonText}>채팅하러 가기</Text>
+                        <Text style={styles.buttonText}>채팅으로도 충분히 재밌으니까</Text>
+                    </View>
+                    <View style={styles.rightTextContainer}>
+                        <Image source={homeC} />
+                    </View>
+                </TouchableOpacity>
+            </View>
 
-                    <TouchableOpacity style={[styles.featureButton, { flex: 1 }]} onPress={() => navigation.navigate('ChatRoomList')}>
-                        <View style={styles.leftTextContainer}>
-                            <Text style={styles.buttonText}>채팅하러 가기</Text>
-                            <Text style={styles.buttonText}>채팅으로도 충분히 재밌으니까</Text>
-                        </View>
-                        <View style={styles.rightTextContainer}>
-                            <Image source={homeC} />
-                        </View>
-                    </TouchableOpacity>
-                </View>
+            {/* 두 번째 버튼 그룹 */}
+            <View style={styles.buttonRow2}>
+                <TouchableOpacity style={[styles.subFeatureButton, { flex: 2 }]} onPress={() => navigation.navigate('BoardList')}>
+                    <View style={styles.iconContainer}>
+                        <Image source={homeB2} />
+                        <Image source={homeB1} />
+                    </View>
+                </TouchableOpacity>
 
-                {/* 두 번째 버튼 그룹 */}
-                <View style={styles.buttonRow2}>
-                    <TouchableOpacity style={[styles.subFeatureButton, { flex: 2 }]} onPress={() => navigation.navigate('BoardList')}>
-                        <View style={styles.iconContainer}>
-                            <Image source={homeB2} />
-                            <Image source={homeB1} />
-                        </View>
-                    </TouchableOpacity>
+                <TouchableOpacity style={[styles.subFeatureButton, { flex: 1 }]} onPress={() => navigation.navigate('Roulette')}>
+                    <View style={styles.singleIconContainer}>
+                        <Image source={homeR} />
+                    </View>
+                </TouchableOpacity>
 
-                    <TouchableOpacity style={[styles.subFeatureButton, { flex: 1 }]} onPress={() => navigation.navigate('Roulette')}>
-                        <View style={styles.singleIconContainer}>
-                            <Image source={homeR} />
-                        </View>
-                    </TouchableOpacity>
+                <TouchableOpacity style={[styles.subFeatureButton, { flex: 2 }]} onPress={() => navigation.navigate('NoticeList')}>
+                    <View style={styles.singleIconContainer}>
+                        <Image source={homeN} />
+                    </View>
+                </TouchableOpacity>
+            </View>
 
-                    <TouchableOpacity style={[styles.subFeatureButton, { flex: 2 }]} onPress={() => navigation.navigate('NoticeList')}>
-                        <View style={styles.singleIconContainer}>
-                            <Image source={homeN} />
-                        </View>
-                    </TouchableOpacity>
-                </View>
+            {/* 버튼 그룹 설명 텍스트 */}
+            <View style={styles.buttonRow2Text}>
+                <Text style={styles.textItem}>오늘의 술상 자랑</Text>
+                <Text style={styles.textItemSmall}>안주 룰렛</Text>
+                <Text style={styles.textItem}>공지 사항</Text>
+            </View>
 
-                {/* 버튼 그룹 설명 텍스트 */}
-                <View style={styles.buttonRow2Text}>
-                    <Text style={styles.textItem}>오늘의 술상 자랑</Text>
-                    <Text style={styles.textItemSmall}>안주 룰렛</Text>
-                    <Text style={styles.textItem}>공지 사항</Text>
-                </View>
-
-                {/* 챗봇 예시 */}
-                <View>
-                    <ChatBotExample />
-                </View>
-            </ScrollView>
+            {/* 챗봇 예시 */}
+            <View>
+                <ChatBotExample />
+            </View>
 
             {/* 하단 네비게이션 바 */}
             <View style={styles.bottomNavigation}>
@@ -116,28 +107,21 @@ export default function HomePage() {
                     <Text style={styles.navItem}>마이 페이지</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </ScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        flexGrow: 1,
         backgroundColor: '#ffffff',
     },
-    scrollContainer: {
-        paddingTop: 100, // 헤더 높이만큼 추가 패딩을 줘서 콘텐츠가 헤더 밑으로 가도록 설정
-    },
     header: {
-        position: 'absolute', // 고정된 위치로 설정
-        top: 0,
-        left: 0,
-        right: 0,
-        height: 100, // 헤더 높이
-        zIndex: 1, // 헤더가 스크롤 내용보다 위에 오도록 설정
+        height: '10%',
         flexDirection: 'row',
         justifyContent: 'space-between',
         padding: 15,
+        marginTop: 10,
         alignItems: 'center',
         backgroundColor: '#ffffff',
         borderBottomWidth: 1,
@@ -156,12 +140,6 @@ const styles = StyleSheet.create({
     loginText: {
         color: '#000000',
         fontSize: 19,
-    },
-    slotMachineContainer: {
-        height: 100, // SlotMachine이 차지할 공간을 설정
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f8f8f8',
     },
     buttonRow1: {
         height: '15%',
