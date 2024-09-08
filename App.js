@@ -26,7 +26,6 @@ import NoticeViewPage from "./src/pages/admin-management-pages/NoticeViewPage/No
 import NoticeEditPage from "./src/pages/admin-management-pages/NoticeEditPage/NoticeEditPage";
 import ChatRoomEditPage from "./src/pages/communication-tools-pages/ChatRoomEditPage/ChatRoomEditPage";
 import ReportListPage from "./src/pages/admin-management-pages/ReportListPage/ReportListPage";
-import ScrollHandler from "./src/pages/auth-management-pages/HomePage/ScrollHandler/ScrollHandler";
 
 
 // Stack Navigator 생성
@@ -138,11 +137,6 @@ export default function App() {
                     name="ReportList"
                     component={ReportListPage}
                     options={{ headerShown: false }}/>
-                <Stack.Screen
-                    name="ScrollHandler"
-                    component={ScrollHandler}
-                    options={{ headerShown: false }}/>
-
             </Stack.Navigator>
         </NavigationContainer>
     );
