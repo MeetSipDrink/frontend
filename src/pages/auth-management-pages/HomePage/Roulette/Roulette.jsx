@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {  Text, StyleSheet, Animated } from 'react-native';
+import {Text, StyleSheet, Animated, View} from 'react-native';
 
 const foodList = ['소주', '맥주', '와인', '막걸리', '양주'];
 const COMPONENT_HEIGHT = 100; // This value can be passed from the main component.
@@ -12,11 +12,11 @@ const Roulette = ({ panY, spinning, slowSpinning, style }) => {
         if (spinning) {
             spinInterval.current = setInterval(() => {
                 setSelectedFood(foodList[Math.floor(Math.random() * foodList.length)]);
-            }, 50);
+            }, 100);
         } else if (slowSpinning) {
             spinInterval.current = setInterval(() => {
                 setSelectedFood(foodList[Math.floor(Math.random() * foodList.length)]);
-            }, 1000);
+            }, 2000);
         } else {
             clearInterval(spinInterval.current);
         }
@@ -32,7 +32,10 @@ const Roulette = ({ panY, spinning, slowSpinning, style }) => {
 
     return (
         <Animated.View style={[styles.roulette, style, { transform: [{ translateY: rouletteY }] }]}>
-            <Text style={styles.rouletteText}>{selectedFood + " 마시자!" || '오늘은 어떤술'}</Text>
+            <View style={styles.rouletteTexts}>
+            <Text style={styles.rouletteText}>{selectedFood  || '오늘은 어떤술'}</Text>
+            <Text style={styles.rouletteText}> 마시자</Text>
+                </View>
         </Animated.View>
     );
 };
@@ -47,11 +50,19 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         zIndex: 1,
+        backgroundColor: `#F9B300`,
+        padding: 20,
     },
     rouletteText: {
         fontSize: 30,
         fontWeight: 'bold',
+        width: 100, // 고정된 너비를 설정하여 밀리지 않도록 처리
+        textAlign: 'center',
     },
+    rouletteTexts: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    }
 });
 
 export default Roulette;
