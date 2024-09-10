@@ -8,7 +8,7 @@ const HOST_IP = '10.0.2.2' //안드에서는 이거로 해야됨
 // baseURL: "http://본인 인터넷 아이피:8080", // 실제 기기
 
 const api = axios.create({
-    baseURL: "http://localhost:8080",
+    baseURL: `http://localhost:8080`,
     headers:{
         Accept:'application/json',
         Authorization:`Bearer ${API_KEY}`
