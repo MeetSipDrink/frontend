@@ -9,20 +9,20 @@ export default function BlockListPage({ navigation }) {
     const API_KEY2 = process.env["REACT_APP_API_URL "];
 
 
-    useEffect(() => {
-        api.get('/members/1')
-            .then((response) => {
-                console.log(response.data);  // 콘솔에 데이터 출력
-                console.log(API_KEY2);
-                console.log(API_KEY);
-
-                setApiResponse(JSON.stringify(response.data, null, 2));  // 보기 좋게 포맷팅
-            })
-            .catch((error) => {
-                console.error("API 호출 오류:", error);
-                setApiResponse('API 호출 중 오류 발생');
-            });
-    }, []);
+    // useEffect(() => {
+    //     api.get('/members/1')
+    //         .then((response) => {
+    //             console.log(response.data);  // 콘솔에 데이터 출력
+    //             console.log(API_KEY2);
+    //             console.log(API_KEY);
+    //
+    //             setApiResponse(JSON.stringify(response.data, null, 2));  // 보기 좋게 포맷팅
+    //         })
+    //         .catch((error) => {
+    //             console.error("API 호출 오류:", error);
+    //             setApiResponse('API 호출 중 오류 발생');
+    //         });
+    // }, []);
 
     return (
         <View style={styles.container}>
