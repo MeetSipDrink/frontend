@@ -33,7 +33,7 @@ const Roulette = ({ panY, spinning, slowSpinning, style }) => {
     return (
         <Animated.View style={[styles.roulette, style, { transform: [{ translateY: rouletteY }] }]}>
             <View style={styles.rouletteTexts}>
-            <Text style={styles.rouletteText}>{selectedFood  || '오늘은 어떤술'}</Text>
+            <Text style={styles.rouletteText}>{selectedFood  || ''}</Text>
             <Text style={styles.rouletteText}> 마시자</Text>
                 </View>
         </Animated.View>

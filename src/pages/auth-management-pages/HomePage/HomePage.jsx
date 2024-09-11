@@ -11,86 +11,96 @@ import homeV from '../../../assets/images/homeV.png';
 import ChatBotExample from "./Bot/ChatBotExample";
 import Roulette from './Roulette/Roulette';
 
+// 화면 크기를 가져와서 동적으로 요소의 크기를 설정
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const ROULETTE_HEIGHT = SCREEN_HEIGHT / 8; // Reduced roulette height
+// 룰렛의 높이를 화면 높이의 1/10로 설정
+const ROULETTE_HEIGHT = SCREEN_HEIGHT / 10;
 
 const MainPage = () => {
-    const navigation = useNavigation();
-    const panY = useRef(new Animated.Value(0)).current;
-    const [spinning, setSpinning] = useState(false);
-    const [isResultShown, setIsResultShown] = useState(false);
-    const [slowSpinning, setSlowSpinning] = useState(false);
+    const navigation = useNavigation(); // 네비게이션 사용을 위한 hook
+    const panY = useRef(new Animated.Value(-100)).current; // 애니메이션 값으로 Y축 이동값을 관리
+    const [spinning, setSpinning] = useState(false); // 룰렛 회전 상태 관리
+    const [isResultShown, setIsResultShown] = useState(false); // 결과 표시 여부 관리
+    const [slowSpinning, setSlowSpinning] = useState(false); // 느린 회전 상태 관리
 
+    // 룰렛을 천천히 멈추게 하는 함수
     const stopSlowly = () => {
-        let remainingTime = 1000;
+        let remainingTime = 1000; // 남은 시간을 1초로 설정
 
         const interval = setInterval(() => {
             remainingTime -= 1000;
             if (remainingTime <= 0) {
-                clearInterval(interval);
-                setSlowSpinning(false);
-                setSpinning(false);
-                showResult();
+                clearInterval(interval); // 시간이 끝나면 인터벌 중지
+                setSlowSpinning(false); // 느린 회전 상태를 false로
+                setSpinning(false); // 전체 회전 상태를 false로
+                showResult(); // 결과 표시 함수 호출
             }
         }, 1000);
     };
 
+    // 결과를 보여주는 함수
     const showResult = () => {
-        setIsResultShown(true);
+        setIsResultShown(true); // 결과를 표시
         setTimeout(() => {
-            setIsResultShown(false);
-            resetPosition();
+            setIsResultShown(false); // 2초 후 결과 표시를 종료
+            resetPosition(); // 애니메이션 상태 초기화
         }, 2000);
     };
 
+    // 애니메이션 위치를 초기 상태로 리셋하는 함수
     const resetPosition = () => {
         Animated.timing(panY, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
+            toValue: 0, // 초기 위치로 설정
+            duration: 300, // 애니메이션 지속 시간
+            useNativeDriver: true, // 네이티브 드라이버 사용
         }).start(() => {
-            setSpinning(false);
+            setSpinning(false); // 회전 상태 종료
         });
     };
 
+    // PanResponder 생성, 드래그 동작 감지 및 반응
     const panResponder = PanResponder.create({
-        onMoveShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true, // 드래그 시작 조건 설정
         onPanResponderMove: (_, gestureState) => {
-            panY.setValue(gestureState.dy);
+            panY.setValue(gestureState.dy); // Y축 드래그 값을 업데이트
             if (gestureState.dy > 0 && !spinning) {
-                setSpinning(true);
+                setSpinning(true); // 드래그가 아래로 움직일 때 회전 상태를 true로 설정
             }
         },
         onPanResponderRelease: (_, gestureState) => {
             if (gestureState.dy > ROULETTE_HEIGHT) {
+                // 드래그가 일정 값 이상일 때
                 Animated.sequence([
                     Animated.timing(panY, {
-                        toValue: ROULETTE_HEIGHT,
+                        toValue: ROULETTE_HEIGHT, // 드래그 한계를 룰렛 높이로 설정
                         duration: 300,
                         useNativeDriver: true,
                     }),
                 ]).start(() => {
-                    setSlowSpinning(true);
-                    stopSlowly();
+                    setSlowSpinning(true); // 느린 회전 상태로 전환
+                    stopSlowly(); // 천천히 멈추기 시작
                 });
             } else {
+                // 드래그 값이 적을 때 원래 위치로 돌아감
                 Animated.spring(panY, {
                     toValue: 0,
                     useNativeDriver: true,
                 }).start(() => {
-                    setSpinning(false);
-                    setIsResultShown(false);
+                    setSpinning(false); // 회전 상태 종료
+                    setIsResultShown(false); // 결과 표시 종료
                 });
             }
         },
     });
 
+    // 룰렛 Y축 이동 애니메이션 설정
     const rouletteTranslateY = panY.interpolate({
-        inputRange: [-ROULETTE_HEIGHT, 0, ROULETTE_HEIGHT],
-        outputRange: [-ROULETTE_HEIGHT, 0, 0],
-        extrapolate: 'clamp',
+        inputRange: [-ROULETTE_HEIGHT, 0, ROULETTE_HEIGHT], // 입력 범위
+        outputRange: [-ROULETTE_HEIGHT, 0, 0], // 출력 범위
+        extrapolate: 'clamp', // 값 제한
     });
 
+    // 스크롤 뷰의 Y축 이동 애니메이션 설정
     const contentTranslateY = panY.interpolate({
         inputRange: [0, ROULETTE_HEIGHT],
         outputRange: [0, ROULETTE_HEIGHT],
@@ -106,6 +116,7 @@ const MainPage = () => {
                 </TouchableOpacity>
             </View>
 
+            {/* 룰렛 애니메이션 영역 */}
             <Animated.View style={[
                 styles.rouletteContainer,
                 { transform: [{ translateY: rouletteTranslateY }] }
@@ -113,6 +124,7 @@ const MainPage = () => {
                 <Roulette panY={panY} spinning={spinning} slowSpinning={slowSpinning} />
             </Animated.View>
 
+            {/* 스크롤 뷰에 PanResponder를 연결하여 드래그 반응 처리 */}
             <Animated.ScrollView
                 {...panResponder.panHandlers}
                 style={[styles.scrollView, { transform: [{ translateY: contentTranslateY }] }]}
@@ -120,6 +132,7 @@ const MainPage = () => {
             >
                 <Homeimg style={styles.homeImage} />
 
+                {/* 주요 버튼 영역 */}
                 <View style={styles.buttonRow1}>
                     <TouchableOpacity style={[styles.featureButton, { flex: 1 }]} onPress={() => navigation.navigate('VideoChat')}>
                         <View style={styles.leftTextContainer}>
@@ -142,6 +155,7 @@ const MainPage = () => {
                     </TouchableOpacity>
                 </View>
 
+                {/* 하단 버튼들 */}
                 <View style={styles.buttonRow2}>
                     <TouchableOpacity style={[styles.subFeatureButton, { flex: 2 }]} onPress={() => navigation.navigate('BoardList')}>
                         <View style={styles.iconContainer}>
@@ -163,6 +177,7 @@ const MainPage = () => {
                     </TouchableOpacity>
                 </View>
 
+                {/* 텍스트 설명 영역 */}
                 <View style={styles.buttonRow2Text}>
                     <Text style={styles.textItem}>오늘의 술상 자랑</Text>
                     <Text style={styles.textItemSmall}>안주 룰렛</Text>
@@ -173,12 +188,11 @@ const MainPage = () => {
                     <ChatBotExample />
                 </View>
             </Animated.ScrollView>
-
-
         </View>
     );
 }
 
+// 스타일 정의
 const styles = StyleSheet.create({
     container: {
         flex: 1,
@@ -190,8 +204,6 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: '#F9B300',
-
-
         paddingTop: 20,
         paddingHorizontal: 15,
         zIndex: 10,

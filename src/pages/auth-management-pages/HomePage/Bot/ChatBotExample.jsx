@@ -4,22 +4,14 @@ import { useNavigation } from '@react-navigation/native';
 
 const ChatBotExample = () => {
     const navigation = useNavigation();
+    const texts = ["술추천해줄께", "나 취해ㅆ다음에 와라!","나 술 전문가!","술이야 뭐든지 물어봐!"];
+    const [text, setText] = useState("쳇봇");
 
-    // 3개의 임의의 텍스트 목록
-    const texts = [
-        "배고파", " 밥줘!"
-    ];
-
-    // 텍스트 상태를 관리하는 useState 훅
-    const [text, setText] = useState(" 쳇봇");
-
-    // 텍스트를 무작위로 변경하는 함수
     const changeText = () => {
         const randomIndex = Math.floor(Math.random() * texts.length);
         setText(texts[randomIndex]);
     };
 
-    // 텍스트 변경 및 페이지 이동 함수
     const handlePress1 = () => {
         changeText();
         navigation.navigate('BotResponse');
@@ -27,18 +19,13 @@ const ChatBotExample = () => {
 
     return (
         <View style={styles.container}>
-            {/* 말풍선 이미지와 텍스트를 가로로 정렬 */}
-            <View style={styles.rowContainer}>
-                {/* 말풍선 이미지 위에 텍스트를 올림 */}
+            <View style={styles.chatbotContainer}>
                 <View style={styles.speechBubbleContainer}>
-                    <Image
-                        source={require('/Users/gimchanjun/Desktop/MeetSipDrink/frontend/src/assets/testimg/ch.png')}
-                        style={styles.speechBubbleImage}
-                    />
-                    <Text style={styles.speechText}>{text}</Text>
+                    <View style={styles.speechBubble}>
+                        <Text style={styles.speechText}>{text}</Text>
+                    </View>
+                    <View style={styles.speechBubblePointer} />
                 </View>
-
-                {/* 버튼을 눌렀을 때 텍스트가 변경되고 페이지가 이동됨 */}
                 <TouchableOpacity style={styles.button} onPress={handlePress1}>
                     <Image
                         source={require('/Users/gimchanjun/Desktop/MeetSipDrink/frontend/src/assets/testimg/homeBot.png')}
@@ -56,43 +43,52 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-end',
         alignItems: 'flex-end',
         backgroundColor: '#fff',
+        padding: 20,
     },
-    rowContainer: {
-        flexDirection: 'row', // 가로로 정렬
-        alignItems: 'center', // 세로 중앙 정렬
+    chatbotContainer: {
+        flexDirection: 'row',
+        alignItems: 'flex-end',
     },
     speechBubbleContainer: {
-        position: 'relative',
-        width: 80, // 말풍선 이미지 크기를 줄임
-        height: 50,  // 말풍선 이미지 크기를 줄임
-
+        marginRight: 10,
+        marginBottom: 15, // 말풍선을 아래로 내림
     },
-    speechBubbleImage: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'contain',
+    speechBubble: {
+        backgroundColor: '#fcefc1',
+        borderRadius: 20,
+        padding: 10,
+        maxWidth: 150,
     },
     speechText: {
-        position: 'absolute',
-        top: '30%',  // 텍스트의 위치를 말풍선 안에 맞춤
-        left: '25%', // 텍스트를 더 왼쪽으로 이동
-        fontSize: 10,  // 텍스트 크기 조절
-        fontWeight: 'bold',
-        color: '#000',
+        fontSize: 14,
+        color: '#333',
     },
-    robotImage: {
-        marginTop: 50, // 로봇 이미지를 말풍선 아래에 위치
-        width: 50,  // 로봇 이미지 크기를 줄임
-        height: 50, // 로봇 이미지 크기를 줄임
-
+    speechBubblePointer: {
+        position: 'absolute',
+        right: -10,
+        bottom: 10,
+        width: 0,
+        height: 0,
+        backgroundColor: 'transparent',
+        borderStyle: 'solid',
+        borderLeftWidth: 10,
+        borderRightWidth: 10,
+        borderBottomWidth: 10,
+        borderLeftColor: 'transparent',
+        borderRightColor: 'transparent',
+        borderBottomColor: '#fcefc1',
+        transform: [{ rotate: '90deg' }],
     },
     button: {
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 10,
-        borderRadius: 5,
+        marginBottom: -15, // 로봇 이미지를 조금 더 아래로 내림
     },
-
+    robotImage: {
+        width: 60,
+        height: 60,
+        resizeMode: 'contain',
+    },
 });
 
 export default ChatBotExample;

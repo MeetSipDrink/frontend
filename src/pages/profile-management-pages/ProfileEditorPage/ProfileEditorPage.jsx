@@ -4,9 +4,7 @@ export default function ProfileEditorPage({ navigation }) {
     return(
         <View style={styles.container}>
             <Text style={styles.pageText}>개인정보 수정 페이지</Text>
-            <TouchableOpacity style={styles.Button} onPress={() => navigation.navigate('MyPage')}>
-                <Text style={styles.buttonText}>마이 페이지</Text>
-            </TouchableOpacity>
+
         </View>
 
     )

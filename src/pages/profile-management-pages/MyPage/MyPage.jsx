@@ -1,134 +1,226 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from "react-native";
-import homeV from '../../../assets/images/homeV.png';
-import profileImage from "../../../assets/images/profileImage.png";
-import React from "react";
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from "react-native";
+import axios from 'axios';
 
-export default function MyPage({navigation}) {
-    return(
-        <View style={styles.container}>
+const API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
 
-            {/* 헤더 영역 */}
-            <View style={styles.top}>
-            <Text style={styles.pageText}>마이 페이지</Text>
+export default function HomePage({ navigation }) {
+    const [userInfo, setUserInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetchUserInfo(); // 컴포넌트가 마운트될 때 사용자 정보 요청
+    }, []);
+
+    const fetchUserInfo = async () => {
+        try {
+            console.log('Fetching user info...');
+            const memberId = 6; // 임시로 memberId 설정
+            const response = await axios.get(`${API_URL}/members/${memberId}`);
+            console.log('Response:', response.data);
+
+            setUserInfo(response.data.data); // 가져온 사용자 정보 저장
+        } catch (error) {
+            console.error('Error fetching user info:', error.response ? error.response.data : error.message);
+            Alert.alert('오류', '사용자 정보를 불러오는 데 실패했습니다.');
+        } finally {
+            setLoading(false); // 로딩 상태 종료
+        }
+    };
+
+    useEffect(() => {
+        console.log('Updated userInfo:', userInfo); // 사용자 정보 업데이트 시 로그 출력
+    }, [userInfo]);
+
+    if (loading) {
+        return (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#F9B300" />
             </View>
+        );
+    }
 
-            {/* 프로필 영역 */}
-                <View style={styles.userInfo}>
-            <Text style={styles.userInfoText}>닉네임 값 받아와야함</Text>
-                    <Image source={profileImage}
-                           style={styles.mainImage} />
-                <Text style={styles.emailText}>이메일 받아와야함</Text>
-            </View>
+    return (
+        <SafeAreaView style={styles.container}>
+            <ScrollView contentContainerStyle={styles.scrollContent}>
+                <View style={styles.contentWrapper}>
+                    {/* 사용자 프로필 영역 */}
+                    <View style={styles.userInfo}>
+                        <Image source={{ uri: userInfo?.profileImage || 'https://via.placeholder.com/150' }} style={styles.mainImage} />
+                        <Text style={styles.userInfoText}>{userInfo?.nickname || '닉네임 없음'}</Text>
+                        <Text style={styles.userInfoEmail}>{userInfo?.email || '이메일 없음'}</Text>
+                    </View>
 
-            {/* 선택 주종 영역 */}
-
-            <View style={styles.friendList}>
-                    <Text>선호주종</Text>
-                    <Text>주종 값</Text>
+                    {/* 페이지 이동 버튼들 */}
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('FriendList')}>
+                            <Text style={styles.buttonText}>친구목록</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ProfileEditor')}>
+                            <Text style={styles.buttonText}>정보수정</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
-            <View style={styles.friendList}>
-                <Text>선호주종</Text>
-                <Text>주종 값</Text>
-            </View>
-            <View style={styles.friendList}>
-                <Text>선호주종</Text>
-                <Text>주종 값</Text>
-            </View>
 
-            {/* 친구목록, 차단목록, 개인정보 수정, 탈퇴 버튼 */}
-            <View style={styles.friendList}>
-                <TouchableOpacity style={styles.Button} onPress={() => navigation.navigate('FriendList')}>
-                    <Text style={styles.buttonText}>친구목록</Text>
+                {/* 사용자 정보 영역 */}
+                <View style={styles.infoContainer}>
+                    <InfoItem label="이름" value={userInfo?.name || '이름 없음'} />
+                    <InfoItem label="성별" value={userInfo?.gender || '성별 정보 없음'} />
+                    <InfoItem label="나이" value={userInfo?.age ? userInfo.age.toString() : '나이 정보 없음'} />
+                    <InfoItem label="선호주종 1" value={userInfo?.alcoholType1 || '정보 없음'} />
+                    {userInfo?.alcoholType2 && <InfoItem label="선호주종 2" value={userInfo.alcoholType2} />}
+                    {userInfo?.alcoholType3 && <InfoItem label="선호주종 3" value={userInfo.alcoholType3} />}
+                </View>
+            </ScrollView>
+
+            {/* 차단목록, 탈퇴 버튼 */}
+            <View style={styles.bottomButtonContainer}>
+                <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('BlockList')}>
+                    <Text style={styles.secondaryButtonText}>차단목록</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.Button} onPress={() => navigation.navigate('BlockList')}>
-                    <Text style={styles.buttonText}>차단목록</Text>
+                <TouchableOpacity style={[styles.secondaryButton, styles.dangerButton]}>
+                    <Text style={[styles.secondaryButtonText, styles.dangerButtonText]}>탈퇴</Text>
                 </TouchableOpacity>
             </View>
-
-
-            <View style={styles.friendList}>
-            <TouchableOpacity style={styles.Button} onPress={() => navigation.navigate('ProfileEditor')}>
-                <Text style={styles.buttonText}>개인정보 수정</Text>
-            </TouchableOpacity>
-            </View>
-                <View style={styles.friendList}>
-            <TouchableOpacity style={styles.Button}>
-                <Text style={styles.buttonText}>탈퇴</Text>
-            </TouchableOpacity>
-            </View>
-            <View style={styles.bottom}>
-            <TouchableOpacity style={styles.Button} onPress={() =>navigation.navigate('Home') }>
-                <Text style={styles.buttonText}>홈으로</Text>
-            </TouchableOpacity>
-            </View>
-        </View>
-
-    )
+        </SafeAreaView>
+    );
 }
 
+const InfoItem = ({ label, value }) => (
+    <View style={styles.infoItem}>
+        <Text style={styles.infoText}>{label}</Text>
+        <Text style={styles.infoValue}>{value}</Text>
+    </View>
+);
+
 const styles = StyleSheet.create({
-    top: {
-        flex: 5,
-        justifyContent: 'center',
-        alignItems: 'center',
-
-    },
-    bottom: {
-        flex: 10,
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f8f8f8',
-    },
-    userInfo: {
-        borderRadius: 10,
-
-        width: '95%',
-        flex: 20,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#E0E0E0',
-
-    },
-    friendList: {
-        flex: 3,
-        flexDirection: 'row',
-        gap: 10,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f8f8f8',
-    },
     container: {
         flex: 1,
+        backgroundColor: '#f0f0f0',
+    },
+    scrollContent: {
+        flexGrow: 1,
+        paddingTop: 50,
+    },
+    contentWrapper: {
+        marginHorizontal: 20,
+        marginBottom: 20,
+        backgroundColor: '#fcefc1',
+        borderRadius: 15,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
+        paddingBottom: 20,
+    },
+    userInfo: {
+        marginTop: 20,
+        width: '100%',
+        alignItems: 'center',
+        paddingVertical: 20,
+    },
+    infoContainer: {
+        width: '90%',
+        alignSelf: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 15,
+        padding: 15,
+        marginBottom: 20,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.20,
+        shadowRadius: 1.41,
+        elevation: 2,
+    },
+    infoItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '100%',
+        paddingVertical: 10,
+        borderBottomWidth: 1,
+        borderBottomColor: '#f0f0f0',
+    },
+    buttonContainer: {
+        flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f8f8f8',
+        gap: 15,
     },
-    pageText: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
+    bottomButtonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingVertical: 15,
+        backgroundColor: '#fff',
+        borderTopWidth: 1,
+        borderTopColor: '#f0f0f0',
     },
     userInfoText: {
         fontSize: 20,
         fontWeight: 'bold',
-        marginBottom: 15,
+        marginTop: 10,
+        color: '#333',
     },
-    emailText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        color: '#gray',
+    userInfoEmail: {
+        fontSize: 16,
+        color: '#666',
+        marginTop: 5,
     },
-    Button: {
-        backgroundColor: '#FF6347',
+    button: {
+        backgroundColor: '#F9B300',
         paddingVertical: 10,
         paddingHorizontal: 20,
+        borderRadius: 8,
+    },
+    secondaryButton: {
+        paddingVertical: 8,
+        paddingHorizontal: 15,
         borderRadius: 5,
+        borderWidth: 1,
+        borderColor: '#ccc',
+    },
+    dangerButton: {
+        borderColor: '#ff4d4f',
     },
     buttonText: {
         color: '#fff',
         fontSize: 16,
+        fontWeight: 'bold',
         textAlign: 'center',
+    },
+    secondaryButtonText: {
+        color: '#666',
+        fontSize: 14,
+        textAlign: 'center',
+    },
+    dangerButtonText: {
+        color: '#ff4d4f',
+    },
+    mainImage: {
+        width: 120,
+        height: 120,
+        borderRadius: 60,
+    },
+    infoText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: '#333',
+    },
+    infoValue: {
+        fontSize: 16,
+        color: '#666',
+        paddingHorizontal: 10,
+        paddingVertical: 5,
+        backgroundColor: '#f9f9f9',
+        borderRadius: 5,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
     },
 });
