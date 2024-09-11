@@ -7,9 +7,7 @@ export default function FriendListPage({ navigation }) {
             <TouchableOpacity style={styles.Button} onPress={() => navigation.navigate('FriendRequest')}>
                 <Text style={styles.buttonText}>친구요청</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.Button} onPress={() => navigation.navigate('Home')}>
-                <Text style={styles.buttonText}>홈으로</Text>
-            </TouchableOpacity>
+
         </View>
 
     )
