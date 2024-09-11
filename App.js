@@ -1,12 +1,12 @@
-import * as React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
-// Import custom BottomNavigation component
+// 커스텀 BottomNavigation 컴포넌트 불러오기
 import BottomNavigation from './src/pages/auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
 
-// Import all your screens here
+// 모든 화면 컴포넌트 불러오기
 import HomePage from './src/pages/auth-management-pages/HomePage/HomePage';
 import LoginPage from './src/pages/auth-management-pages/LoginPage/LoginPage';
 import SignUpFormPage from "./src/pages/auth-management-pages/SignUpFormPage/SignUpFormPage";
@@ -33,10 +33,13 @@ import NoticeEditPage from "./src/pages/admin-management-pages/NoticeEditPage/No
 import ChatRoomEditPage from "./src/pages/communication-tools-pages/ChatRoomEditPage/ChatRoomEditPage";
 import ReportListPage from "./src/pages/admin-management-pages/ReportListPage/ReportListPage";
 
+// LoadingPage 불러오기
+import LoadingPage from './src/pages/auth-management-pages/LoadingPage/LoadingPage';
+
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
-// Main tab navigator with custom BottomNavigation
+// 커스텀 BottomNavigation을 사용하는 메인 탭 네비게이터
 function MainTabNavigator() {
     return (
         <Tab.Navigator tabBar={props => <BottomNavigation {...props} />}>
@@ -46,14 +49,30 @@ function MainTabNavigator() {
             <Tab.Screen name="MyPage" component={MyPage} options={{ headerShown: false }} />
             <Tab.Screen name="Roulette" component={RoulettePage} options={{ headerShown: false }} />
             <Stack.Screen name="BotResponse" component={BotResponsePage} options={{ headerShown: false }} />
-
-
         </Tab.Navigator>
     );
 }
 
-// Main app component
+// 메인 앱 컴포넌트
 export default function App() {
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        // 로딩 시간 시뮬레이션 (예: 데이터 가져오기)
+        const loadApp = async () => {
+            // 2초 대기 (여기에 실제 데이터를 로딩하는 로직 추가 가능)
+            setTimeout(() => {
+                setIsLoading(false); // 로딩 완료 시 상태 변경
+            }, 2000);
+        };
+
+        loadApp();
+    }, []);
+
+    if (isLoading) {
+        return <LoadingPage />; // 로딩 중일 때 로딩 페이지 표시
+    }
+
     return (
         <NavigationContainer>
             <Stack.Navigator initialRouteName="MainTab">
