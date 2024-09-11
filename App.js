@@ -42,7 +42,6 @@ function MainTabNavigator() {
         <Tab.Navigator tabBar={props => <BottomNavigation {...props} />}>
             <Tab.Screen name="Home" component={HomePage} options={{ headerShown: false }} />
             <Tab.Screen name="ChatRoomList" component={ChatRoomListPage} options={{ headerShown: false }} />
-            <Tab.Screen name="FriendList" component={FriendListPage} options={{ headerShown: false }} />
             <Tab.Screen name="BoardList" component={BoardListPage} options={{ headerShown: false }} />
             <Tab.Screen name="MyPage" component={MyPage} options={{ headerShown: false }} />
             <Tab.Screen name="Roulette" component={RoulettePage} options={{ headerShown: false }} />
@@ -64,11 +63,12 @@ export default function App() {
                     options={{ headerShown: false }}
                 />
                 <Stack.Screen name="Login" component={LoginPage} options={{ headerShown: true ,headerTitle: ''}} />
-                <Stack.Screen name="SignUpForm" component={SignUpFormPage} options={{ headerShown: true ,headerTitle: '회원가입'}} />
-                <Stack.Screen name="SignUpAgreement" component={SignUpAgreementPage} options={{ headerShown: false }} />
-                <Stack.Screen name="FriendRequest" component={FriendRequestPage} options={{ headerShown: false }} />
-                <Stack.Screen name="BlockList" component={BlockListPage} options={{ headerShown: false }} />
-                <Stack.Screen name="ProfileEditor" component={ProfileEditorPage} options={{ headerShown: false }} />
+                <Stack.Screen name="SignUpForm" component={SignUpFormPage} options={{ headerShown: true ,headerTitle: ''}} />
+                <Stack.Screen name="SignUpAgreement" component={SignUpAgreementPage} options={{ headerShown: true ,headerTitle:""}} />
+                <Stack.Screen name="FriendList" component={FriendListPage} options={{  headerShown: true ,headerTitle: ''}} />
+                <Stack.Screen name="FriendRequest" component={FriendRequestPage} options={{  headerShown: true ,headerTitle: '' }} />
+                <Stack.Screen name="BlockList" component={BlockListPage} options={{  headerShown: true ,headerTitle: ''}} />
+                <Stack.Screen name="ProfileEditor" component={ProfileEditorPage} options={{ headerShown: true ,headerTitle: ""}} />
                 <Stack.Screen name="BoardView" component={BoardViewPage} options={{ headerShown: false }} />
                 <Stack.Screen name="BoardPost" component={BoardPostPage} options={{ headerShown: false }} />
                 <Stack.Screen name="BoardEdit" component={BoardEditPage} options={{ headerShown: false }} />
