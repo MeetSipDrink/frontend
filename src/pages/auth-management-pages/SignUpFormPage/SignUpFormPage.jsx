@@ -22,13 +22,13 @@ const SignUpTermsPage = () => {
 
     return (
         <View style={styles.container}>
-            <ScrollView style={styles.scrollView}>
+            <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
                 <Text style={styles.title}>회원가입</Text>
                 <Text style={styles.subTitle}>아래 약관을 읽고 동의해 주세요.</Text>
 
                 <View style={styles.termsSection}>
                     <Text style={styles.termsTitle}>이용약관 동의</Text>
-                    <ScrollView style={styles.termsContent}>
+                    <ScrollView style={styles.termsContent} showsVerticalScrollIndicator={false}>
                         <Text>
                             {`# 한마디 한 잔 서비스 이용약관\n
 ## 제1조 [목적]\n
@@ -51,7 +51,7 @@ const SignUpTermsPage = () => {
 
                 <View style={styles.termsSection}>
                     <Text style={styles.termsTitle}>개인정보 수집 및 이용 동의</Text>
-                    <ScrollView style={styles.termsContent}>
+                    <ScrollView style={styles.termsContent} showsVerticalScrollIndicator={false}>
                         <Text>
                             {`'한마디 한 잔'은 고객님의 개인정보를 중요시하며, "정보통신망 이용촉진 및 정보보호"에 관한 법률을 준수하고 있습니다.\n
 한마디 한 잔은 개인정보취급방침을 통하여 고객님께서 제공하시는 개인정보가 어떠한 용도와 방식으로 이용되고 있으며, 개인정보보호를 위해 어떠한 조치가 취해지고 있는지 알려드립니다.\n

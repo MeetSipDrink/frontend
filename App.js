@@ -83,11 +83,11 @@ export default function App() {
                 />
                 <Stack.Screen name="Login" component={LoginPage} options={{ headerShown: true ,headerTitle: ''}} />
                 <Stack.Screen name="SignUpForm" component={SignUpFormPage} options={{ headerShown: true ,headerTitle: ''}} />
-                <Stack.Screen name="SignUpAgreement" component={SignUpAgreementPage} options={{ headerShown: true ,headerTitle:""}} />
+                <Stack.Screen name="SignUpAgreement" component={SignUpAgreementPage} options={{ headerShown: true ,headerTitle:"회원가입"}} />
                 <Stack.Screen name="FriendList" component={FriendListPage} options={{  headerShown: true ,headerTitle: ''}} />
                 <Stack.Screen name="FriendRequest" component={FriendRequestPage} options={{  headerShown: true ,headerTitle: '' }} />
                 <Stack.Screen name="BlockList" component={BlockListPage} options={{  headerShown: true ,headerTitle: ''}} />
-                <Stack.Screen name="ProfileEditor" component={ProfileEditorPage} options={{ headerShown: true ,headerTitle: ""}} />
+                <Stack.Screen name="ProfileEditor" component={ProfileEditorPage} options={{ headerShown: true ,headerTitle: "프로필 수정"}} />
                 <Stack.Screen name="BoardView" component={BoardViewPage} options={{ headerShown: false }} />
                 <Stack.Screen name="BoardPost" component={BoardPostPage} options={{ headerShown: false }} />
                 <Stack.Screen name="BoardEdit" component={BoardEditPage} options={{ headerShown: false }} />

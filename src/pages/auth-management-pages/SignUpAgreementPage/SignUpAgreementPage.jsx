@@ -11,11 +11,11 @@ import {
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
-import {useNavigation} from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 
-const  EXPO_APP_URI = 'http://172.30.1.19:8080'
-
-const AD_API_URL = 'http://172.30.1.19:8080'; // 실제 API URL로 변경해주세요
+const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
+const EXPO_APP_URI = 'http://172.30.1.19:8080';
+const DEFAULT_PROFILE_IMAGE = require('/Users/gimchanjun/Desktop/MeetSipDrink/frontend/src/assets/images/profileImage.png');
 
 const uploadImageToS3 = async (uri) => {
     // 실제 S3 업로드 로직 구현
@@ -27,11 +27,12 @@ export default function SignUpFormPage() {
     const [password, setPassword] = useState('');
     const [profileImage, setProfileImage] = useState('');
     const [nickname, setNickname] = useState('');
+    const [nicknameChecked, setNicknameChecked] = useState(false);
     const [gender, setGender] = useState('');
     const [name, setName] = useState('');
     const [age, setAge] = useState('');
     const [alcoholTypes, setAlcoholTypes] = useState(['', '', '']);
-const navigation = useNavigation();
+    const navigation = useNavigation();
 
     const handleAlcoholTypeChange = (index, value) => {
         const newAlcoholTypes = [...alcoholTypes];
@@ -69,10 +70,48 @@ const navigation = useNavigation();
         return true;
     };
 
+    const checkNickname = async () => {
+        // 닉네임 중복 검사 로직 (주석 처리)
+        /*
+        if (!nickname) {
+            Alert.alert('오류', '닉네임을 입력해주세요.');
+            return;
+        }
+
+        const nicknameRegex = /^[a-zA-Z0-9가-힣]{2,8}$/;
+        if (!nicknameRegex.test(nickname)) {
+            Alert.alert('오류', '특수문자 제외 2자 이상 8자 이하로 입력해주세요.');
+            return;
+        }
+
+        try {
+            const response = await axios.get(`${EXPO_APP_URI}/search/${nickname}`);
+            const isAvailable = response.data;
+            if (isAvailable) {
+                Alert.alert('성공', '사용 가능한 닉네임입니다.');
+                setNicknameChecked(true);
+            } else {
+                Alert.alert('오류', '이미 사용 중인 닉네임입니다.');
+                setNicknameChecked(false);
+            }
+        } catch (error) {
+            console.error('Error checking nickname:', error);
+            Alert.alert('오류', '닉네임 중복 검사에 실패했습니다.');
+            setNicknameChecked(false);
+        }
+        */
+        // 임시로 항상 true 반환
+        setNicknameChecked(true);
+    };
+
     const handleSignUp = async () => {
         if (!validateInputs()) return;
+        if (!nicknameChecked) {
+            Alert.alert("오류", "닉네임 중복 검사를 먼저 진행해주세요.");
+            return;
+        }
         try {
-            const response = await axios.post(`${EXPO_APP_URI}/members`, {
+            const response = await axios.patch(`${ADS_API_URL}/members`, {
                 email,
                 password,
                 profileImage,
@@ -93,12 +132,19 @@ const navigation = useNavigation();
             console.error(error);
             Alert.alert("오류", "회원가입 중 오류가 발생했습니다.");
         }
-
     };
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <Text style={styles.pageText}>회원가입</Text>
+
+
+            <TouchableOpacity onPress={handleImagePick} style={styles.imageContainer}>
+                <Image
+                    source={profileImage ? { uri: profileImage } : DEFAULT_PROFILE_IMAGE}
+                    style={styles.profileImage}
+                />
+                <Text style={styles.changePhotoText}>프로필 사진 선택</Text>
+            </TouchableOpacity>
 
             <TextInput
                 style={styles.input}
@@ -120,12 +166,20 @@ const navigation = useNavigation();
                 value={name}
                 onChangeText={setName}
             />
-            <TextInput
-                style={styles.input}
-                placeholder="닉네임"
-                value={nickname}
-                onChangeText={setNickname}
-            />
+            <View style={styles.nicknameContainer}>
+                <TextInput
+                    style={styles.nicknameInput}
+                    placeholder="닉네임"
+                    value={nickname}
+                    onChangeText={(text) => {
+                        setNickname(text);
+                        setNicknameChecked(false);
+                    }}
+                />
+                <TouchableOpacity style={styles.checkButton} onPress={checkNickname}>
+                    <Text style={styles.checkButtonText}>중복 검사</Text>
+                </TouchableOpacity>
+            </View>
             <TextInput
                 style={styles.input}
                 placeholder="성별 (M 또는 F)"
@@ -139,15 +193,6 @@ const navigation = useNavigation();
                 onChangeText={setAge}
                 keyboardType="numeric"
             />
-            <TouchableOpacity style={styles.imagePickerButton} onPress={handleImagePick}>
-                <Text style={styles.imagePickerButtonText}>프로필 사진 선택</Text>
-            </TouchableOpacity>
-            {profileImage ? (
-                <View>
-                    <Image source={{ uri: profileImage }} style={styles.profileImage} />
-                    <Text style={styles.imageUrlText}>이미지 URL: {profileImage}</Text>
-                </View>
-            ) : null}
             {alcoholTypes.map((type, index) => (
                 <TextInput
                     key={index}
@@ -179,6 +224,20 @@ const styles = StyleSheet.create({
         marginBottom: 30,
         color: '#333',
     },
+    imageContainer: {
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    profileImage: {
+        width: 150,
+        height: 150,
+        borderRadius: 75,
+        marginBottom: 10,
+    },
+    changePhotoText: {
+        color: '#4CAF50',
+        fontSize: 16,
+    },
     input: {
         width: '100%',
         backgroundColor: '#fff',
@@ -189,31 +248,32 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         marginBottom: 15,
     },
-    imagePickerButton: {
+    nicknameContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 15,
+        width: '100%',
+    },
+    nicknameInput: {
+        flex: 1,
+        backgroundColor: '#fff',
+        paddingHorizontal: 15,
+        paddingVertical: 10,
+        borderRadius: 5,
+        borderColor: '#ddd',
+        borderWidth: 1,
+        marginRight: 10,
+    },
+    checkButton: {
         backgroundColor: '#4CAF50',
         paddingVertical: 10,
-        paddingHorizontal: 20,
+        paddingHorizontal: 15,
         borderRadius: 5,
-        marginBottom: 15,
     },
-    imagePickerButtonText: {
+    checkButtonText: {
         color: '#fff',
-        fontSize: 16,
+        fontSize: 14,
         fontWeight: 'bold',
-        textAlign: 'center',
-    },
-    profileImage: {
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        marginBottom: 15,
-        alignSelf: 'center',
-    },
-    imageUrlText: {
-        marginBottom: 15,
-        fontSize: 12,
-        color: '#666',
-        textAlign: 'center',
     },
     button: {
         backgroundColor: '#FF6347',
