@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -22,6 +20,27 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-db.json
+# Expo
 .expo
+.expo-shared
+
+# Android
+/android/app/build
+/android/.gradle
+/android/app/*.keystore
+
+# iOS
+/ios
+*.xcworkspace
+*.xcodeproj
+*.xcuserdata
+Pods/
+Podfile.lock
+
+# IDE 설정 파일
 .idea
+.vscode/
+*.swp
+
+# 기타
+db.json

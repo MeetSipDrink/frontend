@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, TextInput, ScrollView, Alert, Image } from "react-native";
 import axios from 'axios';
-import * as ImagePicker from 'expo-image-picker';
+
 
 const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
 
