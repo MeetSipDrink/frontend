@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import  homeBot from '../../../../assets/testimg/homeBot.png';
 
 const ChatBotExample = () => {
     const navigation = useNavigation();
@@ -28,7 +29,7 @@ const ChatBotExample = () => {
                 </View>
                 <TouchableOpacity style={styles.button} onPress={handlePress1}>
                     <Image
-                        source={require('/Users/gimchanjun/Desktop/MeetSipDrink/frontend/src/assets/testimg/homeBot.png')}
+                        source={homeBot}
                         style={styles.robotImage}
                     />
                 </TouchableOpacity>
