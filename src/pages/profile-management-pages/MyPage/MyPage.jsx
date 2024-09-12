@@ -1,36 +1,44 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from "react-native";
 import axios from 'axios';
+import { useFocusEffect } from '@react-navigation/native';
 
-const API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
+const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
 
-export default function HomePage({ navigation }) {
+export default function MyPage({ navigation, route }) {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchUserInfo(); // 컴포넌트가 마운트될 때 사용자 정보 요청
-    }, []);
-
-    const fetchUserInfo = async () => {
+    // 사용자 정보를 서버에서 가져오는 함수
+    const fetchUserInfo = useCallback(async () => {
         try {
             console.log('Fetching user info...');
-            const memberId = 6; // 임시로 memberId 설정
-            const response = await axios.get(`${API_URL}/members/${memberId}`);
+            const memberId = 1; // 임시로 memberId 설정
+            const response = await axios.get(`${ADS_API_URL}/members/${memberId}`);
             console.log('Response:', response.data);
 
-            setUserInfo(response.data.data); // 가져온 사용자 정보 저장
+            setUserInfo(response.data.data);
         } catch (error) {
             console.error('Error fetching user info:', error.response ? error.response.data : error.message);
             Alert.alert('오류', '사용자 정보를 불러오는 데 실패했습니다.');
         } finally {
-            setLoading(false); // 로딩 상태 종료
+            setLoading(false);
         }
-    };
+    }, []);
 
+    // 첫 렌더링 시에만 사용자 정보를 가져옴
     useEffect(() => {
-        console.log('Updated userInfo:', userInfo); // 사용자 정보 업데이트 시 로그 출력
-    }, [userInfo]);
+        fetchUserInfo();
+    }, [fetchUserInfo]);
+
+    // 프로필 수정 후 돌아왔을 때만 정보를 다시 가져옴
+    useFocusEffect(
+        useCallback(() => {
+            if (route.params?.profileUpdated) {
+                fetchUserInfo();
+            }
+        }, [fetchUserInfo, route.params?.profileUpdated])
+    );
 
     if (loading) {
         return (
@@ -56,7 +64,10 @@ export default function HomePage({ navigation }) {
                         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('FriendList')}>
                             <Text style={styles.buttonText}>친구목록</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('ProfileEditor')}>
+                        <TouchableOpacity
+                            style={styles.button}
+                            onPress={() => navigation.navigate('ProfileEditor', { userInfo: userInfo })}
+                        >
                             <Text style={styles.buttonText}>정보수정</Text>
                         </TouchableOpacity>
                     </View>
@@ -68,8 +79,12 @@ export default function HomePage({ navigation }) {
                     <InfoItem label="성별" value={userInfo?.gender || '성별 정보 없음'} />
                     <InfoItem label="나이" value={userInfo?.age ? userInfo.age.toString() : '나이 정보 없음'} />
                     <InfoItem label="선호주종 1" value={userInfo?.alcoholType1 || '정보 없음'} />
-                    {userInfo?.alcoholType2 && <InfoItem label="선호주종 2" value={userInfo.alcoholType2} />}
-                    {userInfo?.alcoholType3 && <InfoItem label="선호주종 3" value={userInfo.alcoholType3} />}
+                    {userInfo?.alcoholType2 && userInfo.alcoholType2 !== '' && (
+                        <InfoItem label="선호주종 2" value={userInfo.alcoholType2} />
+                    )}
+                    {userInfo?.alcoholType3 && userInfo.alcoholType3 !== '' && (
+                        <InfoItem label="선호주종 3" value={userInfo.alcoholType3} />
+                    )}
                 </View>
             </ScrollView>
 
