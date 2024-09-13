@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 
-const EXPO_APP_URI = 'http://172.30.1.19:8080';
+
 const AD_API_URL = 'http://10.0.2.2:8080';
 
 const FloatingLabelInput = ({label, value, onChangeText, secureTextEntry}) => {
