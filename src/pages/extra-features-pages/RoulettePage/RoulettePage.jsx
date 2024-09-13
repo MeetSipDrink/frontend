@@ -182,9 +182,21 @@ const Roulette = () => {
                   <Stop offset="100%" stopColor="#2E7D32" stopOpacity="1" />
                 </RadialGradient>
               </Defs>
-              <Circle cx={CIRCLE_SIZE / 2} cy={CIRCLE_SIZE / 2} r={CIRCLE_SIZE / 2} fill="#333" />
-              <Circle cx={CIRCLE_SIZE / 2} cy={CIRCLE_SIZE / 2} r={CIRCLE_SIZE / 2 - 5} fill="none" stroke="#ffffff" strokeWidth="2" />
-              {renderSlices()}
+              <Circle cx={CIRCLE_SIZE / 2} cy={CIRCLE_SIZE / 2} r={CIRCLE_SIZE / 2} fill="#FFFFFF" />
+              <Circle cx={CIRCLE_SIZE / 2} cy={CIRCLE_SIZE / 2} r={CIRCLE_SIZE / 2 - 5} fill="none" stroke="#333333" strokeWidth="2" />
+              {items.length > 0 ? renderSlices() : (
+                  <SvgText
+                      x={CIRCLE_SIZE / 2}
+                      y={CIRCLE_SIZE / 2}
+                      fill="#333333"
+                      fontSize="16"
+                      fontWeight="bold"
+                      textAnchor="middle"
+                      alignmentBaseline="middle"
+                  >
+                    2개 이상의 메뉴를 추가해주세요
+                  </SvgText>
+              )}
             </Svg>
           </Animated.View>
         </View>
