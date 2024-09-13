@@ -1,4 +1,4 @@
-package com.mynewproject
+package com.MeetSipDrink
 
 import android.app.Application
 import com.facebook.react.PackageList

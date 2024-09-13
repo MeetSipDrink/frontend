@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import {useNavigation} from '@react-navigation/native';
+import defaultProfileImage from '../../../assets/images/profileImage.png';
 
-const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
-const EXPO_APP_URI = 'http://172.30.1.19:8080';
-const DEFAULT_PROFILE_IMAGE = require('/Users/gimchanjun/Desktop/test/nativeCliTest/src/assets/images/profileImage.png');
+
+
 
 const uploadImageToS3 = async uri => {
   // 실제 S3 업로드 로직 구현
@@ -91,7 +91,7 @@ export default function SignUpFormPage() {
         }
 
         try {
-            const response = await axios.get(`${EXPO_APP_URI}/search/${nickname}`);
+            const response = await axios.get(`${ADS_API_URL}/search/${nickname}`);
             const isAvailable = response.data;
             if (isAvailable) {
                 Alert.alert('성공', '사용 가능한 닉네임입니다.');
@@ -144,7 +144,7 @@ export default function SignUpFormPage() {
     <ScrollView contentContainerStyle={styles.container}>
       <TouchableOpacity onPress={handleImagePick} style={styles.imageContainer}>
         <Image
-          source={profileImage ? {uri: profileImage} : DEFAULT_PROFILE_IMAGE}
+          source={profileImage ? {uri: profileImage} : defaultProfileImage}
           style={styles.profileImage}
         />
         <Text style={styles.changePhotoText}>프로필 사진 선택</Text>
