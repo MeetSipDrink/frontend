@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, Text, Animated} from 'react-native';
+import {View, StyleSheet, Animated} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome'; // 아이콘 임포트
 
 // 로딩 중 표시될 문구들
@@ -22,8 +22,6 @@ export default function LoadingPage() {
   useEffect(() => {
     async function prepare() {
       try {
-        // 스플래시 스크린 유지
-        await SplashScreen.preventAutoHideAsync();
         // 랜덤한 문구 선택
         setPhrase(
             loadingPhrases[Math.floor(Math.random() * loadingPhrases.length)],
@@ -46,8 +44,6 @@ export default function LoadingPage() {
         duration: 1000,
         useNativeDriver: true,
       }).start(async () => {
-        // 애니메이션 완료 후 스플래시 스크린 숨기기
-        await SplashScreen.hideAsync();
       });
     }
   }, [isReady]);
@@ -59,7 +55,7 @@ export default function LoadingPage() {
   return (
       <View style={styles.container}>
         <Animated.View style={{opacity: fadeAnim}}>
-          <Icon name="glass-cheers" size={80} color="#F9B300" />
+          <Icon name="glass" size={80} color="#F9B300" />
         </Animated.View>
         <Animated.Text style={[styles.title, {opacity: fadeAnim}]}>
           한마디 한잔
