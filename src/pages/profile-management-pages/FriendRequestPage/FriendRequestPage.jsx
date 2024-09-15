@@ -1,9 +1,9 @@
-// FriendRequestModal.js
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, FlatList, Modal, Alert, Image, ActivityIndicator } from "react-native";
 import axios from 'axios';
 
 const ADS_API_URL = 'http://10.0.2.2:8080';
+const MEMBER_ID = 1; // 하드코딩된 memberId
 
 export default function FriendRequestModal({ visible, onClose, onRequestsUpdated }) {
     const [friendRequests, setFriendRequests] = useState([]);
@@ -18,8 +18,7 @@ export default function FriendRequestModal({ visible, onClose, onRequestsUpdated
     const fetchFriendRequests = async () => {
         setLoading(true);
         try {
-            const memberId = 1; // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
-            const response = await axios.get(`${ADS_API_URL}/friends/${memberId}/pending`);
+            const response = await axios.get(`${ADS_API_URL}/friends/${MEMBER_ID}/pending`);
             setFriendRequests(response.data.data);
         } catch (error) {
             console.error('Error fetching friend requests:', error);
@@ -31,18 +30,17 @@ export default function FriendRequestModal({ visible, onClose, onRequestsUpdated
 
     const handleAction = async (action, friendId) => {
         try {
-            const recipientId = 1; // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
             if (action === 'accept') {
                 await axios.post(`${ADS_API_URL}/friends/accept`, {
-                    friendId: friendId,
-                    recipientId: recipientId
+                    requesterId: MEMBER_ID,
+                    recipientId: friendId
                 });
                 Alert.alert('성공', '친구 요청을 수락했습니다.');
             } else if (action === 'reject') {
                 await axios.delete(`${ADS_API_URL}/friends`, {
                     data: {
-                        requesterId: friendId,
-                        recipientId: recipientId
+                        requesterId: MEMBER_ID,
+                        recipientId: friendId
                     }
                 });
                 Alert.alert('성공', '친구 요청을 거절했습니다.');
