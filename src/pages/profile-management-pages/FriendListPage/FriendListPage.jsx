@@ -1,8 +1,8 @@
-// FriendListPage.js
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, View, Text, FlatList, Alert, TextInput, Image, Modal } from "react-native";
+import { StyleSheet, TouchableOpacity, View, Text, FlatList, Alert, TextInput, Image } from "react-native";
 import axios from 'axios';
 import FriendRequestModal from '../FriendRequestPage/FriendRequestPage';
+import UserProfileModal from '../UserProfileModal/UserProfileModal';
 
 const ADS_API_URL = 'http://10.0.2.2:8080';
 
@@ -11,9 +11,9 @@ export default function FriendListPage({ navigation }) {
     const [pendingFriendsCount, setPendingFriendsCount] = useState(0);
     const [loading, setLoading] = useState(true);
     const [newFriendId, setNewFriendId] = useState('');
-    const [deleteModalVisible, setDeleteModalVisible] = useState(false);
     const [selectedFriend, setSelectedFriend] = useState(null);
     const [requestModalVisible, setRequestModalVisible] = useState(false);
+    const [profileModalVisible, setProfileModalVisible] = useState(false);
 
     useEffect(() => {
         loadFriends();
@@ -53,18 +53,13 @@ export default function FriendListPage({ navigation }) {
         }
     };
 
-    const removeFriend = async () => {
-        if (!selectedFriend) {
-            Alert.alert('오류', '선택된 친구가 없습니다.');
-            return;
-        }
-
+    const removeFriend = async (friendId) => {
         try {
             const memberId = 1; // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
             await axios.delete(`${ADS_API_URL}/friends/remove`, {
                 data: {
                     requesterId: memberId,
-                    recipientId: selectedFriend.friendId
+                    recipientId: friendId
                 }
             });
             Alert.alert('성공', '친구가 삭제되었습니다.');
@@ -72,31 +67,26 @@ export default function FriendListPage({ navigation }) {
         } catch (error) {
             console.error('Error removing friend:', error);
             Alert.alert('오류', '친구 삭제에 실패했습니다.');
-        } finally {
-            setDeleteModalVisible(false);
-            setSelectedFriend(null);
+            throw error;
         }
     };
 
     const renderFriendItem = ({ item }) => (
         <View style={styles.friendItem}>
-            <Image
-                source={{ uri: item.FriendProfileImage || 'https://via.placeholder.com/50' }}
-                style={styles.profileImage}
-            />
-            <View style={styles.friendInfo}>
-                <Text style={styles.friendName}>{item.friendNickName}</Text>
-                <Text style={styles.friendDetails}>{item.friendGender} | {item.friendAlcoholType1}</Text>
-            </View>
             <TouchableOpacity
-                style={styles.deleteButton}
                 onPress={() => {
                     setSelectedFriend(item);
-                    setDeleteModalVisible(true);
+                    setProfileModalVisible(true);
                 }}
             >
-                <Text style={styles.buttonText}>삭제</Text>
+                <Image
+                    source={{ uri: item.friendProfileImage || 'https://via.placeholder.com/50' }}
+                    style={styles.profileImage}
+                />
             </TouchableOpacity>
+            <View style={styles.friendInfo}>
+                <Text style={styles.friendName}>{item.friendNickName}</Text>
+            </View>
         </View>
     );
 
@@ -135,43 +125,25 @@ export default function FriendListPage({ navigation }) {
                     <FlatList
                         data={acceptedFriends}
                         renderItem={renderFriendItem}
-                        keyExtractor={(item) => item.friendId}
+                        keyExtractor={(item) => item.friendId.toString()}
                         style={styles.list}
                     />
                 </>
             )}
 
-            <Modal
-                animationType="slide"
-                transparent={true}
-                visible={deleteModalVisible}
-                onRequestClose={() => setDeleteModalVisible(false)}
-            >
-                <View style={styles.centeredView}>
-                    <View style={styles.modalView}>
-                        <Text style={styles.modalText}>친구를 삭제하시겠습니까?</Text>
-                        <View style={styles.modalButtons}>
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.confirmButton]}
-                                onPress={removeFriend}
-                            >
-                                <Text style={styles.buttonText}>확인</Text>
-                            </TouchableOpacity>
-                            <TouchableOpacity
-                                style={[styles.modalButton, styles.cancelButton]}
-                                onPress={() => setDeleteModalVisible(false)}
-                            >
-                                <Text style={styles.buttonText}>취소</Text>
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-                </View>
-            </Modal>
-
             <FriendRequestModal
                 visible={requestModalVisible}
                 onClose={() => setRequestModalVisible(false)}
                 onRequestsUpdated={loadFriends}
+            />
+
+            <UserProfileModal
+                visible={profileModalVisible}
+                onClose={() => setProfileModalVisible(false)}
+                user={selectedFriend}
+                relationship="friend"
+                onUnfriend={removeFriend}
+                onProfileUpdate={loadFriends}
             />
         </View>
     );
@@ -253,64 +225,10 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
-    friendDetails: {
-        fontSize: 14,
-        color: '#666',
-    },
-    deleteButton: {
-        backgroundColor: '#ff4d4f',
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderRadius: 5,
-    },
     sectionTitle: {
         fontSize: 18,
         fontWeight: 'bold',
         marginTop: 20,
         marginBottom: 10,
-    },
-    centeredView: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    },
-    modalView: {
-        backgroundColor: 'white',
-        borderRadius: 20,
-        padding: 35,
-        alignItems: 'center',
-        shadowColor: '#000',
-        shadowOffset: {
-            width: 0,
-            height: 2
-        },
-        shadowOpacity: 0.25,
-        shadowRadius: 4,
-        elevation: 5,
-        width: '90%',
-    },
-    modalText: {
-        marginBottom: 15,
-        textAlign: 'center',
-        fontSize: 18,
-    },
-    modalButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-    },
-    modalButton: {
-        borderRadius: 5,
-        padding: 10,
-        elevation: 2,
-        flex: 1,
-        marginHorizontal: 5,
-    },
-    confirmButton: {
-        backgroundColor: '#2196F3',
-    },
-    cancelButton: {
-        backgroundColor: '#f44336',
     },
 });

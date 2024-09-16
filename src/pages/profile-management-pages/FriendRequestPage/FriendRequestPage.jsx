@@ -56,12 +56,11 @@ export default function FriendRequestModal({ visible, onClose, onRequestsUpdated
     const renderFriendRequestItem = ({ item }) => (
         <View style={styles.requestItem}>
             <Image
-                source={{ uri: item.FriendProfileImage || 'https://via.placeholder.com/50' }}
+                source={{ uri: item.friendProfileImage || 'https://via.placeholder.com/50' }}
                 style={styles.profileImage}
             />
             <View style={styles.friendInfo}>
                 <Text style={styles.friendName}>{item.friendNickName}</Text>
-                <Text style={styles.friendDetails}>{item.friendGender} | {item.friendAlcoholType1}</Text>
             </View>
             <View style={styles.actionButtons}>
                 <TouchableOpacity
@@ -162,10 +161,6 @@ const styles = StyleSheet.create({
     friendName: {
         fontSize: 16,
         fontWeight: 'bold',
-    },
-    friendDetails: {
-        fontSize: 14,
-        color: '#666',
     },
     actionButtons: {
         flexDirection: 'row',
