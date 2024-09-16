@@ -27,6 +27,30 @@
         }
       }
     },
+    "react-native-camera": {
+      "root": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-camera",
+      "name": "react-native-camera",
+      "platforms": {
+        "ios": {
+          "podspecPath": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-camera/react-native-camera.podspec",
+          "version": "4.2.1",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-camera/android",
+          "packageImportPath": "import org.reactnative.camera.RNCameraPackage;",
+          "packageInstance": "new RNCameraPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-camera/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
     "react-native-gesture-handler": {
       "root": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-gesture-handler",
       "name": "react-native-gesture-handler",
@@ -48,6 +72,31 @@
             "RNGestureHandlerRootViewComponentDescriptor"
           ],
           "cmakeListsPath": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
+    "react-native-permissions": {
+      "root": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-permissions",
+      "name": "react-native-permissions",
+      "platforms": {
+        "ios": {
+          "podspecPath": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-permissions/RNPermissions.podspec",
+          "version": "4.1.5",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-permissions/android",
+          "packageImportPath": "import com.zoontek.rnpermissions.RNPermissionsPackage;",
+          "packageInstance": "new RNPermissionsPackage()",
+          "buildTypes": [],
+          "libraryName": "RNPermissionsSpec",
+          "componentDescriptors": [],
+          "cmakeListsPath": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -433,8 +482,7 @@
         },
         {
           "name": "--terminal <string>",
-          "description": "Launches the Metro Bundler in a new window using the specified terminal path.",
-          "default": "iTerm.app"
+          "description": "Launches the Metro Bundler in a new window using the specified terminal path."
         },
         {
           "name": "--binary-path <string>",
@@ -593,8 +641,7 @@
         },
         {
           "name": "--terminal <string>",
-          "description": "Launches the Metro Bundler in a new window using the specified terminal path.",
-          "default": "iTerm.app"
+          "description": "Launches the Metro Bundler in a new window using the specified terminal path."
         },
         {
           "name": "--appId <string>",
