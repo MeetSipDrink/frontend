@@ -125,7 +125,7 @@ export default function FriendListPage({ navigation }) {
                     <FlatList
                         data={acceptedFriends}
                         renderItem={renderFriendItem}
-                        keyExtractor={(item) => item.friendId.toString()}
+                        keyExtractor={(item) => item.friendId}
                         style={styles.list}
                     />
                 </>
