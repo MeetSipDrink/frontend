@@ -91,11 +91,11 @@ const UserProfileModal = ({
                 <View style={styles.modalView}>
 
                     <Image
-                        source={{ uri: user?.profileImage || 'https://via.placeholder.com/100' }}
+                        source={{ uri: user?.friendProfileImage || 'https://via.placeholder.com/50' }}
                         style={styles.profileImage}
                     />
                     <Text style={styles.nickname}>{user?.bannedNickname || user?.friendNickName}</Text>
-                    <Text style={styles.details}>{user?.gender} | {user?.preferredAlcohol}</Text>
+                    <Text style={styles.details}>{user?.friendGender} | {user?.friendAlcoholType1}</Text>
 
                     {renderActionButtons()}
 

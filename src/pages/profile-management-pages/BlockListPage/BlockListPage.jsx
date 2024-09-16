@@ -50,7 +50,7 @@ export default function BlockListPage({ navigation }) {
                 }}
             >
                 <Image
-                    source={{ uri: item.profileImage || 'https://via.placeholder.com/50' }}
+                    source={{ uri: item.friendProfileImage || 'https://via.placeholder.com/50' }}
                     style={styles.profileImage}
                 />
             </TouchableOpacity>
