@@ -27,6 +27,34 @@
         }
       }
     },
+    "@react-native-picker/picker": {
+      "root": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/@react-native-picker/picker",
+      "name": "@react-native-picker/picker",
+      "platforms": {
+        "ios": {
+          "podspecPath": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/@react-native-picker/picker/RNCPicker.podspec",
+          "version": "2.8.0",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/@react-native-picker/picker/android",
+          "packageImportPath": "import com.reactnativecommunity.picker.RNCPickerPackage;",
+          "packageInstance": "new RNCPickerPackage()",
+          "buildTypes": [],
+          "libraryName": "rnpicker",
+          "componentDescriptors": [
+            "RNCAndroidDialogPickerComponentDescriptor",
+            "RNCAndroidDropdownPickerComponentDescriptor"
+          ],
+          "cmakeListsPath": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/@react-native-picker/picker/android/src/main/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
     "react-native-camera": {
       "root": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-camera",
       "name": "react-native-camera",

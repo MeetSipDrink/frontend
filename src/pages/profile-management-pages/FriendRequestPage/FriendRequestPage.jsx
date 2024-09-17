@@ -3,7 +3,7 @@ import { StyleSheet, Text, TouchableOpacity, View, FlatList, Modal, Alert, Image
 import axios from 'axios';
 
 const ADS_API_URL = 'http://10.0.2.2:8080';
-const MEMBER_ID = 1; // 하드코딩된 memberId
+const MEMBER_ID = 1; // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
 
 export default function FriendRequestModal({ visible, onClose, onRequestsUpdated }) {
     const [friendRequests, setFriendRequests] = useState([]);
