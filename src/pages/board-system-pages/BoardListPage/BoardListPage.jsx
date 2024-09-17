@@ -13,12 +13,11 @@ import {
     SafeAreaView
 } from "react-native";
 import { Picker } from '@react-native-picker/picker';
-import useRefreshPosts from '../useRefreshPosts/useRefreshPosts'; // 분리된 훅을 임포트합니다.
+import useRefreshPosts from '../useRefreshPosts/useRefreshPosts';
 
 const API_URL = 'http://10.0.2.2:8080';
 
 const BoardListPage = ({ navigation }) => {
-    // 상태 변수 선언
     const [posts, setPosts] = useState([]);
     const [page, setPage] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -33,15 +32,14 @@ const BoardListPage = ({ navigation }) => {
     const loadingRef = useRef(false);
     const flatListRef = useRef();
 
-    // 분리된 useRefreshPosts 훅을 사용하여 새로고침 기능을 구현합니다.
     const { refreshing, refreshPosts } = useRefreshPosts(
         size,
         sortBy,
-        searchKeyword,
-        searchOption,
         setPosts,
         setPage,
-        setHasMore
+        setHasMore,
+        setSearchKeyword,
+        setSearchOption
     );
 
     const mergePosts = useCallback((prevPosts, newPosts) => {
@@ -77,13 +75,13 @@ const BoardListPage = ({ navigation }) => {
             loadingRef.current = false;
             setLoading(false);
         }
-    }, [sortBy, size, mergePosts, hasMore]);
+    }, [sortBy, size, mergePosts]);
 
     useEffect(() => {
         setHasMore(true);
         setPage(0);
-        fetchPosts(0, true, searchKeyword, searchOption);
-    }, [sortBy, fetchPosts]);
+        fetchPosts(0, true, '', 'title');
+    }, [sortBy]);
 
     const handleSearch = useCallback(() => {
         setHasMore(true);
@@ -108,6 +106,11 @@ const BoardListPage = ({ navigation }) => {
             </View>
             <Text style={styles.postTitle}>{item.title}</Text>
             <Text style={styles.postContent} numberOfLines={2}>{item.content}</Text>
+
+            {item.imageUrl1 ? (
+                <Image source={{ uri: item.imageUrl1 }} style={styles.postImage} />
+            ) : null}
+
             <View style={styles.postFooter}>
                 <Text style={styles.postInfo}>조회 {item.views}</Text>
                 <Text style={styles.postInfo}>좋아요 {item.likeCount}</Text>
@@ -147,12 +150,10 @@ const BoardListPage = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.container}>
-            {/* 헤더 */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>게시판</Text>
             </View>
 
-            {/* 검색 영역 */}
             <View style={styles.searchContainer}>
                 <View style={styles.pickerContainer}>
                     <Picker
@@ -177,7 +178,6 @@ const BoardListPage = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
 
-            {/* 정렬 선택 영역 */}
             <View style={styles.sortContainer}>
                 <Picker
                     selectedValue={sortBy}
@@ -191,7 +191,6 @@ const BoardListPage = ({ navigation }) => {
                 </Picker>
             </View>
 
-            {/* 게시물 목록 */}
             <FlatList
                 ref={flatListRef}
                 data={posts}
@@ -212,7 +211,6 @@ const BoardListPage = ({ navigation }) => {
                 scrollEventThrottle={16}
             />
 
-            {/* 맨 위로 가기 버튼 */}
             {showScrollTopButton && (
                 <TouchableOpacity
                     style={styles.scrollTopButton}
@@ -222,7 +220,6 @@ const BoardListPage = ({ navigation }) => {
                 </TouchableOpacity>
             )}
 
-            {/* 게시글 작성 버튼 */}
             <TouchableOpacity
                 style={styles.createButton}
                 onPress={() => navigation.navigate('BoardPost')}
@@ -328,6 +325,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
         marginBottom: 10,
         color: '#666',
+    },
+    postImage: {
+        width: '100%',
+        height: 400,
+        marginTop: 10,
+        borderRadius: 10,
     },
     postFooter: {
         flexDirection: 'row',

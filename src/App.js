@@ -148,7 +148,7 @@ export default function App() {
         <Stack.Screen
           name="BoardPost"
           component={BoardPostPage}
-          options={{headerShown: false}}
+          options={{headerShown: true , headerTitle: '게시글 작성'}}
         />
         <Stack.Screen
           name="BoardEdit"
