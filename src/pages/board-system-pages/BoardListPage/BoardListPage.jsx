@@ -13,10 +13,12 @@ import {
     SafeAreaView
 } from "react-native";
 import { Picker } from '@react-native-picker/picker';
+import useRefreshPosts from '../useRefreshPosts/useRefreshPosts'; // 분리된 훅을 임포트합니다.
 
 const API_URL = 'http://10.0.2.2:8080';
 
 const BoardListPage = ({ navigation }) => {
+    // 상태 변수 선언
     const [posts, setPosts] = useState([]);
     const [page, setPage] = useState(0);
     const [loading, setLoading] = useState(false);
@@ -30,6 +32,17 @@ const BoardListPage = ({ navigation }) => {
 
     const loadingRef = useRef(false);
     const flatListRef = useRef();
+
+    // 분리된 useRefreshPosts 훅을 사용하여 새로고침 기능을 구현합니다.
+    const { refreshing, refreshPosts } = useRefreshPosts(
+        size,
+        sortBy,
+        searchKeyword,
+        searchOption,
+        setPosts,
+        setPage,
+        setHasMore
+    );
 
     const mergePosts = useCallback((prevPosts, newPosts) => {
         const postIds = new Set(prevPosts.map(post => post.postId));
@@ -45,7 +58,6 @@ const BoardListPage = ({ navigation }) => {
 
         try {
             const url = `${API_URL}/posts/search/?page=${pageToFetch}&size=${size}&keyword=${keyword}&sort=${sortBy}&searchOption=${option}`;
-
             console.log(`Fetching: ${url}`);
             const response = await axios.get(url);
             const newPosts = response.data.data;
@@ -65,7 +77,7 @@ const BoardListPage = ({ navigation }) => {
             loadingRef.current = false;
             setLoading(false);
         }
-    }, [sortBy, size, mergePosts]);
+    }, [sortBy, size, mergePosts, hasMore]);
 
     useEffect(() => {
         setHasMore(true);
@@ -135,10 +147,12 @@ const BoardListPage = ({ navigation }) => {
 
     return (
         <SafeAreaView style={styles.container}>
+            {/* 헤더 */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>게시판</Text>
             </View>
 
+            {/* 검색 영역 */}
             <View style={styles.searchContainer}>
                 <View style={styles.pickerContainer}>
                     <Picker
@@ -163,6 +177,7 @@ const BoardListPage = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
 
+            {/* 정렬 선택 영역 */}
             <View style={styles.sortContainer}>
                 <Picker
                     selectedValue={sortBy}
@@ -176,6 +191,7 @@ const BoardListPage = ({ navigation }) => {
                 </Picker>
             </View>
 
+            {/* 게시물 목록 */}
             <FlatList
                 ref={flatListRef}
                 data={posts}
@@ -186,8 +202,8 @@ const BoardListPage = ({ navigation }) => {
                 ListFooterComponent={renderFooter}
                 refreshControl={
                     <RefreshControl
-                        refreshing={loading}
-                        onRefresh={() => fetchPosts(0, true, searchKeyword, searchOption)}
+                        refreshing={refreshing}
+                        onRefresh={refreshPosts}
                         colors={["#F9B300"]}
                         tintColor="#F9B300"
                     />
@@ -196,6 +212,7 @@ const BoardListPage = ({ navigation }) => {
                 scrollEventThrottle={16}
             />
 
+            {/* 맨 위로 가기 버튼 */}
             {showScrollTopButton && (
                 <TouchableOpacity
                     style={styles.scrollTopButton}
@@ -205,6 +222,7 @@ const BoardListPage = ({ navigation }) => {
                 </TouchableOpacity>
             )}
 
+            {/* 게시글 작성 버튼 */}
             <TouchableOpacity
                 style={styles.createButton}
                 onPress={() => navigation.navigate('BoardPost')}
