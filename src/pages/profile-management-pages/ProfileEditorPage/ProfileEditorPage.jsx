@@ -31,7 +31,7 @@ export default function ProfileEditorPage({ route, navigation }) {
 
         try {
             setLoading(true);
-            const memberId = 1;
+            const memberId = 1; // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
             const updatedFields = {
                 nickname: userInfo.nickname,
                 profileImage: profileImage,
