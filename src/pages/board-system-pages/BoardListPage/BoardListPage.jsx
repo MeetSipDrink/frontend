@@ -106,6 +106,11 @@ const BoardListPage = ({ navigation }) => {
             </View>
             <Text style={styles.postTitle}>{item.title}</Text>
             <Text style={styles.postContent} numberOfLines={2}>{item.content}</Text>
+
+            {item.imageUrl1 ? (
+                <Image source={{ uri: item.imageUrl1 }} style={styles.postImage} />
+            ) : null}
+
             <View style={styles.postFooter}>
                 <Text style={styles.postInfo}>조회 {item.views}</Text>
                 <Text style={styles.postInfo}>좋아요 {item.likeCount}</Text>
@@ -320,6 +325,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
         marginBottom: 10,
         color: '#666',
+    },
+    postImage: {
+        width: '100%',
+        height: 400,
+        marginTop: 10,
+        borderRadius: 10,
     },
     postFooter: {
         flexDirection: 'row',
