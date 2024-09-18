@@ -1,40 +1,300 @@
-import {StyleSheet, TouchableOpacity, View,Text} from "react-native";
+import React, { useState } from 'react';
+import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, TextInput, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import AntDesign from 'react-native-vector-icons/AntDesign';
+import BottomNavigation from '../../auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
 
-export default function NoticePostPage({navigation}) {
-    return(<View style={styles.container}>
-            <Text style={styles.pageText}>공지사항 작성 페이지</Text>
-        <TouchableOpacity style={styles.Button} onPress={() => navigation.navigate('NoticeList')}>
-            <Text style={styles.buttonText}>공지사항 리스트(뒤로가기)</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.Button} onPress={() => navigation.navigate('Home')}>
-            <Text style={styles.buttonText}>홈으로</Text>
-        </TouchableOpacity>
-        </View>
+export default function NoticePostPage({ navigation }) {
+    const [images, setImages] = useState([]); // 선택된 이미지의 URI 목록
+    const [imageUrls, setImageUrls] = useState([]); // 서버에서 받은 이미지 URL 리스트
+    const [title, setTitle] = useState('');
+    const [content, setContent] = useState('');
 
-    )
+    // 이미지 선택 및 업로드 함수
+    const handleSelectImage = () => {
+        const options = {
+            mediaType: 'photo',
+            maxWidth: 600,
+            maxHeight: 600,
+            quality: 1,
+        };
+    
+        launchImageLibrary(options, async (response) => {
+            if (response.didCancel) {
+                Alert.alert('알림', '이미지 선택이 취소되었습니다.');
+            } else if (response.errorMessage) {
+                Alert.alert('에러', '이미지를 선택하는 중 오류가 발생했습니다.');
+            } else {
+                const uri = response.assets[0].uri;
+                setImages(prevImages => [...prevImages, { uri }]); // 선택된 이미지를 추가
+    
+                // 이미지 업로드 (즉시 서버에 업로드)
+                const formData = new FormData();
+                formData.append('multipartFile', {
+                    uri: uri,
+                    type: 'image/jpeg',
+                    name: `image_${new Date().getTime()}.jpg`,
+                });
+    
+                try {
+                    const uploadResponse = await fetch('http://10.0.2.2:8080/images', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    });
+                    
+                    // 응답이 JSON 형식인지 확인
+                    const contentType = uploadResponse.headers.get('content-type');
+                    
+                    let result;
+                    if (contentType && contentType.includes('application/json')) {
+                        result = await uploadResponse.json(); // JSON 형식일 경우 파싱
+                    } else {
+                        result = await uploadResponse.text(); // JSON이 아닐 경우 텍스트로 처리
+                    }
+    
+                    if (uploadResponse.ok) {
+                        if (typeof result === 'string') {
+                            Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
+                            console.log('이미지 URL:', result); // 응답이 텍스트일 경우 로그로 확인
+                            setImageUrls(prevUrls => [...prevUrls, result]); // 텍스트로 온 경우 result 자체를 추가
+                        } else {
+                            Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
+                            console.log('이미지 URL:', result.imageUrl); // JSON 형식일 경우
+                            setImageUrls(prevUrls => [...prevUrls, result.imageUrl]); // JSON 형식에서 imageUrl을 추가
+                        }
+                    } else {
+                        Alert.alert('실패', '이미지 업로드에 실패했습니다.');
+                        console.error(result);
+                    }
+                } catch (error) {
+                    console.error('이미지 업로드 오류:', error);
+                    Alert.alert('에러', '이미지를 업로드하는 중 오류가 발생했습니다.');
+                }
+            }
+        });
+    };
+    
+
+    // 이미지 삭제 함수
+    const handleDeleteImage = (index) => {
+        setImages(prevImages => prevImages.filter((_, i) => i !== index)); // 선택된 이미지 URI 목록에서 해당 이미지 삭제
+        setImageUrls(prevUrls => prevUrls.filter((_, i) => i !== index)); // 서버에서 받은 이미지 URL에서도 해당 이미지 삭제
+    };
+
+    // 공지사항 업로드 함수
+    const handleUploadNotice = async () => {
+        if (!title || !content) {
+            Alert.alert('알림', '제목과 내용을 입력해주세요.');
+            return;
+        }
+        
+        const noticeData = {
+            title,
+            content,
+            imageUrls, // 업로드된 이미지 URL 리스트
+        };
+    
+        try {
+            const response = await fetch('http://10.0.2.2:8080/notices?memberId=1', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(noticeData),
+            });
+    
+            // 서버 응답의 Content-Type 확인
+            const contentType = response.headers.get('content-type');
+            
+            let result;
+            if (contentType && contentType.includes('application/json')) {
+                result = await response.json(); // JSON 형식일 경우 파싱
+            } else {
+                result = await response.text(); // JSON이 아닐 경우 텍스트로 처리
+            }
+    
+            if (response.ok) {
+                Alert.alert('성공', '공지사항이 성공적으로 업로드되었습니다.');
+                console.log(result);
+                navigation.navigate('NoticeList');
+            } else {
+                Alert.alert('실패', '공지사항 업로드에 실패했습니다.');
+                console.error(result);
+            }
+        } catch (error) {
+            console.error('공지사항 업로드 오류:', error);
+            Alert.alert('에러', '공지사항을 업로드하는 중 오류가 발생했습니다.');
+        }
+    };
+    
+
+    const dismissKeyboard = () => {
+        Keyboard.dismiss();
+    };
+
+    return (
+        <TouchableWithoutFeedback onPress={dismissKeyboard}>
+            <View style={styles.wrapper}>
+                <View style={styles.header}>
+                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                        <AntDesign name="left" size={24} color="black" />
+                    </TouchableOpacity>
+                    <Text style={styles.title}>공지사항 작성</Text>
+                </View>
+
+                <View style={styles.container}>
+                    <TextInput
+                        style={styles.input}
+                        placeholder="제목을 입력하세요"
+                        value={title}
+                        onChangeText={setTitle}
+                    />
+
+                    <ScrollView horizontal style={styles.imageContainer}>
+                        {images.map((image, index) => (
+                            <View key={index} style={styles.imageWrapper}>
+                                <Image source={{ uri: image.uri }} style={styles.image} />
+                                {/* 이미지 삭제 버튼 */}
+                                <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteImage(index)}>
+                                    <AntDesign name="closecircle" size={24} color="red" />
+                                </TouchableOpacity>
+                            </View>
+                        ))}
+                        <TouchableOpacity style={styles.addImageButton} onPress={handleSelectImage}>
+                            <AntDesign name="plus" size={40} color="#bbb" />
+                            <Text style={styles.addImageText}>이미지를 선택해주세요.</Text>
+                        </TouchableOpacity>
+                    </ScrollView>
+
+                    <TextInput
+                        style={styles.textArea}
+                        placeholder="내용을 입력하세요"
+                        multiline
+                        numberOfLines={20}
+                        value={content}
+                        onChangeText={setContent}
+                    />
+
+                    <TouchableOpacity style={styles.uploadButton} onPress={handleUploadNotice}>
+                        <Text style={styles.uploadButtonText}>공지사항 업로드</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.bottomNavigationWrapper}>
+                    <BottomNavigation navigation={navigation} />
+                </View>
+            </View>
+        </TouchableWithoutFeedback>
+    );
 }
 
 const styles = StyleSheet.create({
-    container: {
+    wrapper: {
         flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        backgroundColor: '#f8f8f8',
     },
-    pageText: {
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        backgroundColor: '#fff',
+    },
+    backButton: {
+        marginRight: 10,
+    },
+    title: {
         fontSize: 24,
         fontWeight: 'bold',
+    },
+    container: {
+        flex: 1,
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        backgroundColor: '#fff',
+    },
+    imageContainer: {
+        flexDirection: 'row',
         marginBottom: 20,
     },
-    Button: {
-        backgroundColor: '#FF6347',
-        paddingVertical: 10,
-        paddingHorizontal: 20,
+    imageWrapper: {
+        width: 150,
+        height: 150,
+        marginRight: 10,
+        position: 'relative', // 삭제 버튼을 절대 위치로 배치하기 위해 relative 사용
+    },
+    image: {
+        width: '100%',
+        height: '100%',
+        borderRadius: 10,
+    },
+    deleteButton: {
+        position: 'absolute',
+        top: 5,
+        right: 5,
+        backgroundColor: 'rgba(255, 255, 255, 0.7)', // 배경이 살짝 보이도록 설정
+        borderRadius: 12,
+    },
+    addImageButton: {
+        width: 150,
+        height: 150,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#f0f0f0',
+        borderRadius: 10,
+        borderWidth: 1,
+        borderColor: '#ccc',
+    },
+    addImageText: {
+        fontSize: 12,
+        color: '#bbb',
+    },
+    input: {
+        height: 40,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        marginBottom: 20,
+        paddingHorizontal: 10,
         borderRadius: 5,
     },
-    buttonText: {
+    textArea: {
+        height: 380,
+        borderColor: '#ccc',
+        borderWidth: 1,
+        padding: 10,
+        borderRadius: 5,
+        textAlignVertical: 'top',
+        marginBottom: 20,
+    },
+    uploadButton: {
+        backgroundColor: '#007bff',
+        paddingVertical: 15,
+        borderRadius: 5,
+        alignItems: 'center',
+        marginBottom: 20,
+    },
+    uploadButtonText: {
         color: '#fff',
         fontSize: 16,
-        textAlign: 'center',
+        fontWeight: 'bold',
+    },
+    bottomNavigationWrapper: {
+        height: 60,
+        borderTopWidth: 1,
+        borderColor: '#e0e0e0',
+        backgroundColor: '#fff',
+    },
+    bottomNavigation: {
+        position: 'absolute',
+        bottom: 0,
+        left: 0,
+        right: 0,
+        width: '100%',
+        height: 60,
+        borderTopWidth: 1,
+        borderColor: '#e0e0e0',
+        backgroundColor: '#fff',
     },
 });
