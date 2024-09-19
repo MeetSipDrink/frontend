@@ -78,20 +78,22 @@ export default function NoticeListPage({ navigation }) {
         return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     };
 
-    const renderItem = ({ item }) => (
-        <TouchableOpacity
-            style={styles.noticeItem}
-            onPress={() => navigation.navigate('NoticeView', { noticeId: item.noticeId })}
-        >
-            <View style={styles.noticeContent}>
-                <Text style={styles.noticeTitle}>{item.title}</Text>
-                <View style={styles.noticeFooter}>
-                    <Text style={styles.noticeViews}>조회수: {item.views.toString()}</Text>
-                    <Text style={styles.noticeDate}>작성일: {formatDate(item.createdAt)}</Text>
+    const renderItem = ({ item }) => {
+        return (
+            <TouchableOpacity
+                style={styles.noticeItem}
+                onPress={() => navigation.navigate('NoticeView', { noticeId: item.noticeId })} // noticeId 전달
+            >
+                <View style={styles.noticeContent}>
+                    <Text style={styles.noticeTitle}>{item.title}</Text>
+                    <View style={styles.noticeFooter}>
+                        <Text style={styles.noticeViews}>조회수: {item.views.toString()}</Text>
+                        <Text style={styles.noticeDate}>작성일: {formatDate(item.createdAt)}</Text>
+                    </View>
                 </View>
-            </View>
-        </TouchableOpacity>
-    );
+            </TouchableOpacity>
+        );
+    };
 
     const renderFooter = () => {
         if (!loading) return null;
@@ -106,10 +108,12 @@ export default function NoticeListPage({ navigation }) {
         <View style={styles.container}>
             {/* 상단 헤더 (뒤로 가기 버튼, 페이지 제목, 정렬 기능) */}
             <View style={styles.headerContainer}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
-                    <AntDesign name="left" size={24} color="#000" />
-                </TouchableOpacity>
-                <Text style={styles.title}>공지사항</Text>
+                <View style={styles.headerLeft}>
+                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
+                        <AntDesign name="left" size={24} color="black" />
+                        <Text style={styles.title}>공지사항</Text>
+                    </TouchableOpacity>
+                </View>
 
                 <View style={styles.sortContainer}>
                     <Picker
@@ -170,11 +174,17 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: '#ddd',
     },
+    headerLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
     backButton: {
-        paddingHorizontal: 10,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     title: {
         fontSize: 20,
+        marginLeft: 5,
         fontWeight: 'bold',
     },
     sortContainer: {
@@ -246,3 +256,4 @@ const styles = StyleSheet.create({
         borderColor: '#e0e0e0',
     },
 });
+
