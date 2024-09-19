@@ -18,7 +18,7 @@ export default function NoticePostPage({ navigation }) {
             maxHeight: 600,
             quality: 1,
         };
-    
+
         launchImageLibrary(options, async (response) => {
             if (response.didCancel) {
                 Alert.alert('알림', '이미지 선택이 취소되었습니다.');
@@ -27,7 +27,7 @@ export default function NoticePostPage({ navigation }) {
             } else {
                 const uri = response.assets[0].uri;
                 setImages(prevImages => [...prevImages, { uri }]); // 선택된 이미지를 추가
-    
+
                 // 이미지 업로드 (즉시 서버에 업로드)
                 const formData = new FormData();
                 formData.append('multipartFile', {
@@ -35,7 +35,7 @@ export default function NoticePostPage({ navigation }) {
                     type: 'image/jpeg',
                     name: `image_${new Date().getTime()}.jpg`,
                 });
-    
+
                 try {
                     const uploadResponse = await fetch('http://10.0.2.2:8080/images', {
                         method: 'POST',
@@ -44,27 +44,21 @@ export default function NoticePostPage({ navigation }) {
                             'Content-Type': 'multipart/form-data',
                         },
                     });
-                    
-                    // 응답이 JSON 형식인지 확인
+
                     const contentType = uploadResponse.headers.get('content-type');
-                    
                     let result;
                     if (contentType && contentType.includes('application/json')) {
-                        result = await uploadResponse.json(); // JSON 형식일 경우 파싱
+                        result = await uploadResponse.json();
                     } else {
-                        result = await uploadResponse.text(); // JSON이 아닐 경우 텍스트로 처리
+                        result = await uploadResponse.text();
                     }
-    
+
                     if (uploadResponse.ok) {
-                        if (typeof result === 'string') {
-                            Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
-                            console.log('이미지 URL:', result); // 응답이 텍스트일 경우 로그로 확인
-                            setImageUrls(prevUrls => [...prevUrls, result]); // 텍스트로 온 경우 result 자체를 추가
-                        } else {
-                            Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
-                            console.log('이미지 URL:', result.imageUrl); // JSON 형식일 경우
-                            setImageUrls(prevUrls => [...prevUrls, result.imageUrl]); // JSON 형식에서 imageUrl을 추가
-                        }
+                        // 이미지 URL 저장
+                        const uploadedImageUrl = typeof result === 'string' ? result : result.imageUrl;
+                        Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
+                        console.log('이미지 URL:', uploadedImageUrl);
+                        setImageUrls(prevUrls => [...prevUrls, uploadedImageUrl]); // 서버에서 받은 이미지 URL 추가
                     } else {
                         Alert.alert('실패', '이미지 업로드에 실패했습니다.');
                         console.error(result);
@@ -76,7 +70,6 @@ export default function NoticePostPage({ navigation }) {
             }
         });
     };
-    
 
     // 이미지 삭제 함수
     const handleDeleteImage = (index) => {
@@ -90,13 +83,13 @@ export default function NoticePostPage({ navigation }) {
             Alert.alert('알림', '제목과 내용을 입력해주세요.');
             return;
         }
-        
+
         const noticeData = {
             title,
             content,
             imageUrls, // 업로드된 이미지 URL 리스트
         };
-    
+
         try {
             const response = await fetch('http://10.0.2.2:8080/notices?memberId=1', {
                 method: 'POST',
@@ -105,17 +98,15 @@ export default function NoticePostPage({ navigation }) {
                 },
                 body: JSON.stringify(noticeData),
             });
-    
-            // 서버 응답의 Content-Type 확인
+
             const contentType = response.headers.get('content-type');
-            
             let result;
             if (contentType && contentType.includes('application/json')) {
                 result = await response.json(); // JSON 형식일 경우 파싱
             } else {
                 result = await response.text(); // JSON이 아닐 경우 텍스트로 처리
             }
-    
+
             if (response.ok) {
                 Alert.alert('성공', '공지사항이 성공적으로 업로드되었습니다.');
                 console.log(result);
@@ -129,7 +120,6 @@ export default function NoticePostPage({ navigation }) {
             Alert.alert('에러', '공지사항을 업로드하는 중 오류가 발생했습니다.');
         }
     };
-    
 
     const dismissKeyboard = () => {
         Keyboard.dismiss();
@@ -157,7 +147,6 @@ export default function NoticePostPage({ navigation }) {
                         {images.map((image, index) => (
                             <View key={index} style={styles.imageWrapper}>
                                 <Image source={{ uri: image.uri }} style={styles.image} />
-                                {/* 이미지 삭제 버튼 */}
                                 <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteImage(index)}>
                                     <AntDesign name="closecircle" size={24} color="red" />
                                 </TouchableOpacity>
@@ -206,7 +195,7 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     title: {
-        fontSize: 24,
+        fontSize: 20,
         fontWeight: 'bold',
     },
     container: {
@@ -223,7 +212,7 @@ const styles = StyleSheet.create({
         width: 150,
         height: 150,
         marginRight: 10,
-        position: 'relative', // 삭제 버튼을 절대 위치로 배치하기 위해 relative 사용
+        position: 'relative',
     },
     image: {
         width: '100%',
@@ -234,7 +223,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         top: 5,
         right: 5,
-        backgroundColor: 'rgba(255, 255, 255, 0.7)', // 배경이 살짝 보이도록 설정
+        backgroundColor: 'rgba(255, 255, 255, 0.7)',
         borderRadius: 12,
     },
     addImageButton: {
@@ -281,17 +270,6 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     bottomNavigationWrapper: {
-        height: 60,
-        borderTopWidth: 1,
-        borderColor: '#e0e0e0',
-        backgroundColor: '#fff',
-    },
-    bottomNavigation: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        width: '100%',
         height: 60,
         borderTopWidth: 1,
         borderColor: '#e0e0e0',
