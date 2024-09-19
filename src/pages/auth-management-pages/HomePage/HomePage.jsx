@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, PanResponder, Dimensions, Animated } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, PanResponder, Dimensions, Animated } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Homeimg from './MainImage/Homeimg';
 import homeB1 from '../../../assets/images/homeB1.png';
