@@ -26,7 +26,7 @@ export default function BoardPostPage({ navigation }) {
                 title,
                 content,
                 memberId: 1,
-                imageUrl1: TEST_IMG_URL2,
+                imageUrl1: TEST_IMG_URL,
                 imageUrl2: TEST_IMG_URL2,
                 imageUrl3: TEST_IMG_URL2,
                 imageUrl4: null,

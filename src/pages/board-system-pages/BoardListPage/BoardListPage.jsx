@@ -18,9 +18,6 @@ import { useFocusEffect } from '@react-navigation/native';
 
 const API_URL = 'http://10.0.2.2:8080';
 
-// 로그인한 사용자의 memberId를 1로 고정
-const loggedInUserId = 1;
-
 const BoardListPage = ({ navigation }) => {
     const [posts, setPosts] = useState([]);
     const [page, setPage] = useState(0);
@@ -32,6 +29,7 @@ const BoardListPage = ({ navigation }) => {
     const [searchKeyword, setSearchKeyword] = useState('');
     const [searchOption, setSearchOption] = useState('title');
     const [showScrollTopButton, setShowScrollTopButton] = useState(false);
+    const [isSearchMode, setIsSearchMode] = useState(false);
 
     const loadingRef = useRef(false);
     const flatListRef = useRef();
@@ -62,7 +60,23 @@ const BoardListPage = ({ navigation }) => {
             const url = `${API_URL}/posts/search/?page=${pageToFetch}&size=${size}&keyword=${keyword}&sort=${sortBy}&searchOption=${option}`;
             console.log(`Fetching: ${url}`);
             const response = await axios.get(url);
-            const newPosts = response.data.data;
+            let newPosts = response.data.data;
+
+            // 클라이언트 측 추가 필터링
+            if (option === 'title') {
+                newPosts = newPosts.filter(post =>
+                    post.title.toLowerCase().includes(keyword.toLowerCase())
+                );
+            } else if (option === 'content') {
+                newPosts = newPosts.filter(post =>
+                    post.content.toLowerCase().includes(keyword.toLowerCase())
+                );
+            } else if (option === 'title_content') {
+                newPosts = newPosts.filter(post =>
+                    post.title.toLowerCase().includes(keyword.toLowerCase()) ||
+                    post.content.toLowerCase().includes(keyword.toLowerCase())
+                );
+            }
 
             if (reset) {
                 setPosts(newPosts);
@@ -70,7 +84,7 @@ const BoardListPage = ({ navigation }) => {
                 setPosts(prevPosts => mergePosts(prevPosts, newPosts));
             }
 
-            setPage(pageToFetch + 1);
+            setPage(pageToFetch);
             setHasMore(newPosts.length === size);
 
         } catch (error) {
@@ -79,24 +93,28 @@ const BoardListPage = ({ navigation }) => {
             loadingRef.current = false;
             setLoading(false);
         }
-    }, [sortBy, size, mergePosts, hasMore]);
+    }, [sortBy, size, mergePosts]);
 
-    // 화면이 포커스될 때마다 게시글을 다시 불러옴
     useFocusEffect(
         useCallback(() => {
-            setHasMore(true);
-            setPage(0);
-            fetchPosts(0, true, searchKeyword, searchOption);
-        }, [fetchPosts, searchKeyword, searchOption])
+            if (!isSearchMode) {
+                setHasMore(true);
+                setPage(0);
+                fetchPosts(0, true);
+            }
+        }, [fetchPosts, isSearchMode])
     );
 
     useEffect(() => {
-        setHasMore(true);
-        setPage(0);
-        fetchPosts(0, true, '', 'title');
-    }, [sortBy, fetchPosts]);
+        if (!isSearchMode) {
+            setHasMore(true);
+            setPage(0);
+            fetchPosts(0, true);
+        }
+    }, [sortBy, fetchPosts, isSearchMode]);
 
     const handleSearch = useCallback(() => {
+        setIsSearchMode(true);
         setHasMore(true);
         setPage(0);
         fetchPosts(0, true, searchKeyword, searchOption);
@@ -104,9 +122,14 @@ const BoardListPage = ({ navigation }) => {
 
     const handleLoadMore = useCallback(() => {
         if (!loadingRef.current && hasMore) {
-            fetchPosts(page, false, searchKeyword, searchOption);
+            const nextPage = page + 1;
+            if (isSearchMode) {
+                fetchPosts(nextPage, false, searchKeyword, searchOption);
+            } else {
+                fetchPosts(nextPage, false);
+            }
         }
-    }, [hasMore, fetchPosts, page, searchKeyword, searchOption]);
+    }, [hasMore, fetchPosts, page, searchKeyword, searchOption, isSearchMode]);
 
     const renderItem = useCallback(({ item }) => (
         <TouchableOpacity
@@ -135,13 +158,22 @@ const BoardListPage = ({ navigation }) => {
     ), [navigation]);
 
     const renderFooter = useCallback(() => {
-        if (!loading) return null;
-        return (
-            <View style={styles.footerLoader}>
-                <ActivityIndicator size="small" color="#F9B300" />
-            </View>
-        );
-    }, [loading]);
+        if (loading) {
+            return (
+                <View style={styles.footerLoader}>
+                    <ActivityIndicator size="small" color="#F9B300" />
+                </View>
+            );
+        }
+        if (!hasMore) {
+            return (
+                <View style={styles.footerLoader}>
+                    <Text>모든 게시물을 불러왔습니다.</Text>
+                </View>
+            );
+        }
+        return null;
+    }, [loading, hasMore]);
 
     const handleScroll = useCallback(event => {
         const currentOffset = event.nativeEvent.contentOffset.y;
@@ -152,11 +184,27 @@ const BoardListPage = ({ navigation }) => {
         flatListRef.current?.scrollToOffset({ offset: 0, animated: true });
     }, []);
 
+    const renderEmptyList = () => (
+        <View style={styles.emptyListContainer}>
+            <Text style={styles.emptyListText}>
+                {isSearchMode ? '검색 결과가 없습니다.' : '게시물이 없습니다.'}
+            </Text>
+        </View>
+    );
+
+    const handleRefresh = useCallback(() => {
+        setIsSearchMode(false);
+        setSearchKeyword('');
+        setHasMore(true);
+        setPage(0);
+        refreshPosts();
+    }, [refreshPosts]);
+
     if (error) {
         return (
             <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{error}</Text>
-                <TouchableOpacity style={styles.retryButton} onPress={() => fetchPosts(0, true, searchKeyword, searchOption)}>
+                <TouchableOpacity style={styles.retryButton} onPress={() => fetchPosts(0, true)}>
                     <Text style={styles.retryButtonText}>다시 시도</Text>
                 </TouchableOpacity>
             </View>
@@ -214,10 +262,11 @@ const BoardListPage = ({ navigation }) => {
                 onEndReached={handleLoadMore}
                 onEndReachedThreshold={0.5}
                 ListFooterComponent={renderFooter}
+                ListEmptyComponent={renderEmptyList}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
-                        onRefresh={refreshPosts}
+                        onRefresh={handleRefresh}
                         colors={["#F9B300"]}
                         tintColor="#F9B300"
                     />
