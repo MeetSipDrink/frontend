@@ -14,8 +14,12 @@ import {
 } from "react-native";
 import { Picker } from '@react-native-picker/picker';
 import useRefreshPosts from '../useRefreshPosts/useRefreshPosts';
+import { useFocusEffect } from '@react-navigation/native';
 
 const API_URL = 'http://10.0.2.2:8080';
+
+// 로그인한 사용자의 memberId를 1로 고정
+const loggedInUserId = 1;
 
 const BoardListPage = ({ navigation }) => {
     const [posts, setPosts] = useState([]);
@@ -75,13 +79,22 @@ const BoardListPage = ({ navigation }) => {
             loadingRef.current = false;
             setLoading(false);
         }
-    }, [sortBy, size, mergePosts]);
+    }, [sortBy, size, mergePosts, hasMore]);
+
+    // 화면이 포커스될 때마다 게시글을 다시 불러옴
+    useFocusEffect(
+        useCallback(() => {
+            setHasMore(true);
+            setPage(0);
+            fetchPosts(0, true, searchKeyword, searchOption);
+        }, [fetchPosts, searchKeyword, searchOption])
+    );
 
     useEffect(() => {
         setHasMore(true);
         setPage(0);
         fetchPosts(0, true, '', 'title');
-    }, [sortBy]);
+    }, [sortBy, fetchPosts]);
 
     const handleSearch = useCallback(() => {
         setHasMore(true);
@@ -98,7 +111,9 @@ const BoardListPage = ({ navigation }) => {
     const renderItem = useCallback(({ item }) => (
         <TouchableOpacity
             style={styles.postItem}
-            onPress={() => navigation.navigate('BoardView', { postId: item.postId })}
+            onPress={() => {
+                navigation.navigate('BoardView', { postId: item.postId });
+            }}
         >
             <View style={styles.postHeader}>
                 <Image source={{ uri: item.profileImage }} style={styles.profileImage} />

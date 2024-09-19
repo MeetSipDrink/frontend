@@ -143,7 +143,7 @@ export default function App() {
         <Stack.Screen
           name="BoardView"
           component={BoardViewPage}
-          options={{headerShown: false}}
+          options={{headerShown: true, headerTitle: ''}}
         />
         <Stack.Screen
           name="BoardPost"
@@ -153,7 +153,7 @@ export default function App() {
         <Stack.Screen
           name="BoardEdit"
           component={BoardEditPage}
-          options={{headerShown: false}}
+          options={{headerShown: true, headerTitle: '게시글 수정'}}
         />
         <Stack.Screen
           name="ChatRoomEdit"

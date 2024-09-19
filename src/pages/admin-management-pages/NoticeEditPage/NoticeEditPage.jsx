@@ -80,13 +80,13 @@ export default function NoticeEditPage({ route, navigation }) {
             Alert.alert('알림', '제목과 내용을 입력해주세요.');
             return;
         }
-    
+
         const noticeData = {
             title,
             content,
             imageUrls, // 업로드된 이미지 URL 리스트
         };
-    
+
         try {
             const response = await fetch(`http://10.0.2.2:8080/notices/${noticeId}?memberId=1`, {
                 method: 'PATCH', // PATCH 요청 사용
@@ -95,11 +95,11 @@ export default function NoticeEditPage({ route, navigation }) {
                 },
                 body: JSON.stringify(noticeData),
             });
-    
+
             if (response.ok) {
                 Alert.alert('성공', '공지사항이 성공적으로 수정되었습니다.');
                 // 수정된 공지사항 데이터를 전달하며 NoticeView로 이동
-                navigation.navigate('NoticeView', { noticeId }); 
+                navigation.navigate('NoticeView', { noticeId });
             } else {
                 Alert.alert('실패', '공지사항 수정에 실패했습니다.');
             }
