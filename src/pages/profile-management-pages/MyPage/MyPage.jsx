@@ -13,7 +13,7 @@ export default function MyPage({ navigation, route }) {
     const fetchUserInfo = useCallback(async () => {
         try {
             console.log('Fetching user info...');
-            const memberId = 1; // 임시로 memberId 설정
+            const memberId = 1;  // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
             const response = await axios.get(`${ADS_API_URL}/members/${memberId}`);
             console.log('Response:', response.data);
 
