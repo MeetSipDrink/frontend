@@ -28,6 +28,7 @@ yarn-error.log*
 /android/app/build
 /android/.gradle
 /android/app/*.keystore
+/android/app/google-services
 
 # iOS
 /ios
