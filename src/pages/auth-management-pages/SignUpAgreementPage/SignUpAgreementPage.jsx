@@ -14,7 +14,7 @@ import {useNavigation} from '@react-navigation/native';
 import defaultProfileImage from '../../../assets/images/profileImage.png';
 
 
-
+const ADS_API_URL = 'http://10.0.2.2:8080';
 
 const uploadImageToS3 = async uri => {
   // 실제 S3 업로드 로직 구현
@@ -117,7 +117,7 @@ export default function SignUpFormPage() {
       return;
     }
     try {
-      const response = await axios.patch(`${ADS_API_URL}/members`, {
+      const response = await axios.post(`${ADS_API_URL}/members`, {
         email,
         password,
         profileImage,

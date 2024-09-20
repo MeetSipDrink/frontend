@@ -99,18 +99,11 @@ export default function NoticePostPage({ navigation }) {
                 body: JSON.stringify(noticeData),
             });
 
-            const contentType = response.headers.get('content-type');
-            let result;
-            if (contentType && contentType.includes('application/json')) {
-                result = await response.json(); // JSON 형식일 경우 파싱
-            } else {
-                result = await response.text(); // JSON이 아닐 경우 텍스트로 처리
-            }
-
             if (response.ok) {
                 Alert.alert('성공', '공지사항이 성공적으로 업로드되었습니다.');
-                console.log(result);
                 navigation.navigate('NoticeList');
+                await sendNotification(title, content);
+
             } else {
                 Alert.alert('실패', '공지사항 업로드에 실패했습니다.');
                 console.error(result);
@@ -118,6 +111,27 @@ export default function NoticePostPage({ navigation }) {
         } catch (error) {
             console.error('공지사항 업로드 오류:', error);
             Alert.alert('에러', '공지사항을 업로드하는 중 오류가 발생했습니다.');
+        }
+    };
+
+    // 알림을 보내는 함수
+    const sendNotification = async (title, message) => {
+        try {
+            const notificationData = {
+                title: title,
+                message: message,
+            };
+
+            await fetch('http://10.0.2.2:8080/api/notifications/notice', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(notificationData),
+            });
+
+        } catch (error) {
+            console.error('알림 전송 오류:', error);
         }
     };
 
@@ -168,7 +182,7 @@ export default function NoticePostPage({ navigation }) {
                     />
 
                     <TouchableOpacity style={styles.uploadButton} onPress={handleUploadNotice}>
-                        <Text style={styles.uploadButtonText}>공지사항 업로드</Text>
+                        <Text style={styles.uploadButtonText}>공지사항 작성</Text>
                     </TouchableOpacity>
                 </View>
 

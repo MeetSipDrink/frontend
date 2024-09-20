@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "411063465493",
+    "project_id": "meetsipdrink",
+    "storage_bucket": "meetsipdrink.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:411063465493:android:fe995e783a7717d8d8401c",
+        "android_client_info": {
+          "package_name": "com.meetsipdrink.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUNLcUkUNlElxkf0r2IkmxHXaiSHZOA0E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
