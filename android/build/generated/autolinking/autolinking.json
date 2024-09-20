@@ -180,6 +180,30 @@
         }
       }
     },
+    "react-native-keychain": {
+      "root": "C:\\Drink2\\frontend\\node_modules\\react-native-keychain",
+      "name": "react-native-keychain",
+      "platforms": {
+        "ios": {
+          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-keychain\\RNKeychain.podspec",
+          "version": "8.2.0",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\react-native-keychain\\android",
+          "packageImportPath": "import com.oblador.keychain.KeychainPackage;",
+          "packageInstance": "new KeychainPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "C:/Drink2/frontend/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
     "react-native-permissions": {
       "root": "C:\\Drink2\\frontend\\node_modules\\react-native-permissions",
       "name": "react-native-permissions",
@@ -211,7 +235,7 @@
       "platforms": {
         "ios": {
           "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-reanimated\\RNReanimated.podspec",
-          "version": "3.15.1",
+          "version": "3.15.2",
           "configurations": [],
           "scriptPhases": []
         },
@@ -299,7 +323,7 @@
       "platforms": {
         "ios": {
           "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-svg\\RNSVG.podspec",
-          "version": "15.6.0",
+          "version": "15.7.1",
           "configurations": [],
           "scriptPhases": []
         },
@@ -351,7 +375,7 @@
       "platforms": {
         "ios": {
           "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-vector-icons\\RNVectorIcons.podspec",
-          "version": "10.1.0",
+          "version": "10.2.0",
           "configurations": [],
           "scriptPhases": []
         },
