@@ -110,22 +110,22 @@
       }
     },
     "@react-native-community/netinfo": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\@react-native-community\\netinfo",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-community\\netinfo",
       "name": "@react-native-community/netinfo",
       "platforms": {
         "ios": {
-          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\@react-native-community\\netinfo\\react-native-netinfo.podspec",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-community\\netinfo\\react-native-netinfo.podspec",
           "version": "11.4.0",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\@react-native-community\\netinfo\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-community\\netinfo\\android",
           "packageImportPath": "import com.reactnativecommunity.netinfo.NetInfoPackage;",
           "packageInstance": "new NetInfoPackage()",
           "buildTypes": [],
           "componentDescriptors": [],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -210,22 +210,22 @@
       }
     },
     "react-native-fs": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\react-native-fs",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-fs",
       "name": "react-native-fs",
       "platforms": {
         "ios": {
-          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-fs\\RNFS.podspec",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-fs\\RNFS.podspec",
           "version": "2.20.0",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\react-native-fs\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-fs\\android",
           "packageImportPath": "import com.rnfs.RNFSPackage;",
           "packageInstance": "new RNFSPackage()",
           "buildTypes": [],
           "componentDescriptors": [],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/react-native-fs/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/react-native-fs/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
