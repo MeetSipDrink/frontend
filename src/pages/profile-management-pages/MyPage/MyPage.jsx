@@ -2,22 +2,69 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from "react-native";
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
+import * as Keychain from 'react-native-keychain';
 
 const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
 
 export default function MyPage({ navigation, route }) {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-    // 사용자 정보를 서버에서 가져오는 함수
+    // 로그인 상태 확인
+    const checkLoginStatus = useCallback(async () => {
+        try {
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                setIsLoggedIn(true);
+            } else {
+                setIsLoggedIn(false);
+            }
+        } catch (error) {
+            console.error('Error checking login status:', error);
+        }
+    }, []);
+
+    // 로그아웃 함수
+    const handleLogout = useCallback(async () => {
+        try {
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                const { accessToken } = JSON.parse(credentials.password);
+                await axios.post(`${ADS_API_URL}/auth/logout`, {}, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+                await Keychain.resetGenericPassword();
+                setIsLoggedIn(false);
+                navigation.navigate('Home'); // 로그인 화면으로 이동
+            }
+        } catch (error) {
+            console.error('Logout error:', error);
+            const credentials = await Keychain.getGenericPassword();
+            const { accessToken, refreshToken } = JSON.parse(credentials.password);
+            console.log('Username:', accessToken);
+            console.log('Password:', refreshToken);
+            Alert.alert('로그아웃 실패', '로그아웃 중 오류가 발생했습니다.');
+        }
+    }, [navigation]);
+
+
     const fetchUserInfo = useCallback(async () => {
         try {
             console.log('Fetching user info...');
-            const memberId = 1;  // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
-            const response = await axios.get(`${ADS_API_URL}/members/${memberId}`);
-            console.log('Response:', response.data);
-
-            setUserInfo(response.data.data);
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                const { accessToken } = JSON.parse(credentials.password);
+                const response = await axios.get(`${ADS_API_URL}/members`, {
+                    headers: {
+                        Authorization: `Bearer ${ accessToken}`,
+                    },
+                });
+                console.log('Response:', response.data);
+                setUserInfo(response.data.data);
+            }
         } catch (error) {
             console.error('Error fetching user info:', error.response ? error.response.data : error.message);
             Alert.alert('오류', '사용자 정보를 불러오는 데 실패했습니다.');
@@ -26,10 +73,11 @@ export default function MyPage({ navigation, route }) {
         }
     }, []);
 
-    // 첫 렌더링 시에만 사용자 정보를 가져옴
+    // 첫 렌더링 시에 로그인 상태 확인 및 사용자 정보를 가져옴
     useEffect(() => {
+        checkLoginStatus();
         fetchUserInfo();
-    }, [fetchUserInfo]);
+    }, [checkLoginStatus, fetchUserInfo]);
 
     // 프로필 수정 후 돌아왔을 때만 정보를 다시 가져옴
     useFocusEffect(
@@ -70,6 +118,11 @@ export default function MyPage({ navigation, route }) {
                         >
                             <Text style={styles.buttonText}>정보수정</Text>
                         </TouchableOpacity>
+                        {isLoggedIn && (
+                            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                                <Text style={styles.buttonText}>로그아웃</Text>
+                            </TouchableOpacity>
+                        )}
                     </View>
                 </View>
 
@@ -162,6 +215,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         gap: 15,
+        flexWrap: 'wrap',
     },
     bottomButtonContainer: {
         flexDirection: 'row',
@@ -186,6 +240,12 @@ const styles = StyleSheet.create({
     },
     button: {
         backgroundColor: '#F9B300',
+        paddingVertical: 10,
+        paddingHorizontal: 20,
+        borderRadius: 8,
+    },
+    logoutButton: {
+        backgroundColor: '#ff4d4f',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 8,

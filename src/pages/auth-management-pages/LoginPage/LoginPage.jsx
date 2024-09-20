@@ -9,7 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import axios from 'axios';
-
+import * as Keychain from 'react-native-keychain';
 
 const AD_API_URL = 'http://10.0.2.2:8080';
 
@@ -48,24 +48,36 @@ const FloatingLabelInput = ({label, value, onChangeText, secureTextEntry}) => {
   };
 
   return (
-    <View style={styles.inputContainer}>
-      <Animated.Text style={labelStyle}>{label}</Animated.Text>
-      <TextInput
-        style={[styles.input, isFocused && styles.focusedInput]}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onChangeText={onChangeText}
-        value={value}
-        secureTextEntry={secureTextEntry}
-        blurOnSubmit
-      />
-    </View>
+      <View style={styles.inputContainer}>
+        <Animated.Text style={labelStyle}>{label}</Animated.Text>
+        <TextInput
+            style={[styles.input, isFocused && styles.focusedInput]}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
+            onChangeText={onChangeText}
+            value={value}
+            secureTextEntry={secureTextEntry}
+            blurOnSubmit
+        />
+      </View>
   );
 };
 
 export default function LoginPage({navigation}) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  const saveToKeychain = async (accessToken, refreshToken) => {
+    try {
+      await Keychain.setGenericPassword('tokens', JSON.stringify({
+        accessToken,
+        refreshToken
+      }));
+      console.log('Tokens saved successfully to Keychain');
+    } catch (error) {
+      console.error('Error saving to Keychain:', error);
+    }
+  };
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -77,70 +89,78 @@ export default function LoginPage({navigation}) {
       const response = await axios.post(`${AD_API_URL}/members/login`, {
         username,
         password,
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
 
-      if (response.status === 200 && response.headers) {
-        const {authorization, refresh} = response.headers;
+      console.log('Server response status:', response.status);
+      console.log('Server response headers:', response.headers);
 
-        if (authorization && authorization.startsWith('Bearer ')) {
-          const accessToken = authorization.split(' ')[1];
-          await AsyncStorage.setItem('accessToken', accessToken);
-        }
+      if (response.status === 200) {
+        const accessToken = response.headers['authorization'];
+        const refreshToken = response.headers['refresh'];
 
-        if (refresh) {
-          await AsyncStorage.setItem('refreshToken', refresh);
-        }
+        if (accessToken && refreshToken) {
+          // Remove 'Bearer ' prefix from accessToken if present
+          const cleanAccessToken = accessToken.startsWith('Bearer ') ? accessToken.slice(7) : accessToken;
 
-        if (authorization || refresh) {
+          await saveToKeychain(cleanAccessToken, refreshToken);
           navigation.navigate('Home');
         } else {
-          throw new Error('토큰이 제공되지 않았습니다.');
+          console.error('Missing tokens in response headers');
+          throw new Error('인증 토큰이 제공되지 않았습니다.');
         }
       } else {
+        console.error('Unexpected response status:', response.status);
         throw new Error('로그인 응답이 올바르지 않습니다.');
       }
     } catch (error) {
       console.error('Login error:', error);
+
       let errorMessage = '로그인에 실패했습니다. 다시 시도해 주세요.';
       if (error.response) {
+        console.log('Error response status:', error.response.status);
+        console.log('Error response data:', error.response.data);
+
         if (error.response.status === 401) {
           errorMessage = '아이디 또는 비밀번호가 올바르지 않습니다.';
         } else if (error.response.status === 400) {
           errorMessage = '잘못된 요청입니다. 입력을 확인해 주세요.';
         }
       } else if (error.request) {
-        errorMessage =
-          '서버와의 통신에 실패했습니다. 네트워크 연결을 확인해 주세요.';
+        errorMessage = '서버와의 통신에 실패했습니다. 네트워크 연결을 확인해 주세요.';
       }
       Alert.alert('로그인 실패', errorMessage);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.pageText}>한마디 한 잔🍻</Text>
-      <View style={styles.InputBox}>
-        <FloatingLabelInput
-          label="아이디"
-          value={username}
-          onChangeText={setUsername}
-        />
-        <FloatingLabelInput
-          label="비밀번호"
-          value={password}
-          onChangeText={setPassword}
-          secureTextEntry
-        />
+      <View style={styles.container}>
+        <Text style={styles.pageText}>한마디 한 잔🍻</Text>
+        <View style={styles.InputBox}>
+          <FloatingLabelInput
+              label="아이디"
+              value={username}
+              onChangeText={setUsername}
+          />
+          <FloatingLabelInput
+              label="비밀번호"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+          />
+        </View>
+        <TouchableOpacity style={styles.LoginButton} onPress={handleLogin}>
+          <Text style={styles.buttonText}>로그인</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+            style={styles.Button}
+            onPress={() => navigation.navigate('SignUpForm')}>
+          <Text>회원가입</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.LoginButton} onPress={handleLogin}>
-        <Text style={styles.buttonText}>로그인</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.Button}
-        onPress={() => navigation.navigate('SignUpForm')}>
-        <Text>회원가입</Text>
-      </TouchableOpacity>
-    </View>
   );
 }
 
