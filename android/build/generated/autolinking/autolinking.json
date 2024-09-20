@@ -1,25 +1,131 @@
 {
-  "root": "C:\\Drink2\\frontend",
-  "reactNativePath": "C:\\Drink2\\frontend\\node_modules\\react-native",
+  "root": "C:\\MeetSipDrink\\frontend",
+  "reactNativePath": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native",
   "reactNativeVersion": "0.75",
   "dependencies": {
+    "@notifee/react-native": {
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\@notifee\\react-native",
+      "name": "@notifee/react-native",
+      "platforms": {
+        "ios": {
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\@notifee\\react-native\\RNNotifee.podspec",
+          "version": "9.0.0",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\@notifee\\react-native\\android",
+          "packageImportPath": "import io.invertase.notifee.NotifeePackage;",
+          "packageInstance": "new NotifeePackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/@notifee/react-native/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
+    "@react-native-async-storage/async-storage": {
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-async-storage\\async-storage",
+      "name": "@react-native-async-storage/async-storage",
+      "platforms": {
+        "ios": {
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-async-storage\\async-storage\\RNCAsyncStorage.podspec",
+          "version": "1.24.0",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-async-storage\\async-storage\\android",
+          "packageImportPath": "import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;",
+          "packageInstance": "new AsyncStoragePackage()",
+          "buildTypes": [],
+          "libraryName": "rnasyncstorage",
+          "componentDescriptors": [],
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/@react-native-async-storage/async-storage/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
+    "@react-native-firebase/app": {
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-firebase\\app",
+      "name": "@react-native-firebase/app",
+      "platforms": {
+        "ios": {
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-firebase\\app\\RNFBApp.podspec",
+          "version": "20.5.0",
+          "configurations": [],
+          "scriptPhases": [
+            {
+              "name": "[RNFB] Core Configuration",
+              "path": "./ios_config.sh",
+              "execution_position": "after_compile",
+              "input_files": [
+                "$(BUILT_PRODUCTS_DIR)/$(INFOPLIST_PATH)"
+              ]
+            }
+          ]
+        },
+        "android": {
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-firebase\\app\\android",
+          "packageImportPath": "import io.invertase.firebase.app.ReactNativeFirebaseAppPackage;",
+          "packageInstance": "new ReactNativeFirebaseAppPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/@react-native-firebase/app/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
+    "@react-native-firebase/messaging": {
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-firebase\\messaging",
+      "name": "@react-native-firebase/messaging",
+      "platforms": {
+        "ios": {
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-firebase\\messaging\\RNFBMessaging.podspec",
+          "version": "20.5.0",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-firebase\\messaging\\android",
+          "packageImportPath": "import io.invertase.firebase.messaging.ReactNativeFirebaseMessagingPackage;",
+          "packageInstance": "new ReactNativeFirebaseMessagingPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/@react-native-firebase/messaging/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
     "@react-native-community/netinfo": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\@react-native-community\\netinfo",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-community\\netinfo",
       "name": "@react-native-community/netinfo",
       "platforms": {
         "ios": {
-          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\@react-native-community\\netinfo\\react-native-netinfo.podspec",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-community\\netinfo\\react-native-netinfo.podspec",
           "version": "11.4.0",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\@react-native-community\\netinfo\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-community\\netinfo\\android",
           "packageImportPath": "import com.reactnativecommunity.netinfo.NetInfoPackage;",
           "packageInstance": "new NetInfoPackage()",
           "buildTypes": [],
           "componentDescriptors": [],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/@react-native-community/netinfo/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -28,22 +134,22 @@
       }
     },
     "@react-native-masked-view/masked-view": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\@react-native-masked-view\\masked-view",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-masked-view\\masked-view",
       "name": "@react-native-masked-view/masked-view",
       "platforms": {
         "ios": {
-          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\@react-native-masked-view\\masked-view\\RNCMaskedView.podspec",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-masked-view\\masked-view\\RNCMaskedView.podspec",
           "version": "0.2.9",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\@react-native-masked-view\\masked-view\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-masked-view\\masked-view\\android",
           "packageImportPath": "import org.reactnative.maskedview.RNCMaskedViewPackage;",
           "packageInstance": "new RNCMaskedViewPackage()",
           "buildTypes": [],
           "componentDescriptors": [],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/@react-native-masked-view/masked-view/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/@react-native-masked-view/masked-view/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -52,17 +158,17 @@
       }
     },
     "@react-native-picker/picker": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\@react-native-picker\\picker",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-picker\\picker",
       "name": "@react-native-picker/picker",
       "platforms": {
         "ios": {
-          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\@react-native-picker\\picker\\RNCPicker.podspec",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-picker\\picker\\RNCPicker.podspec",
           "version": "2.8.0",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\@react-native-picker\\picker\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\@react-native-picker\\picker\\android",
           "packageImportPath": "import com.reactnativecommunity.picker.RNCPickerPackage;",
           "packageInstance": "new RNCPickerPackage()",
           "buildTypes": [],
@@ -71,7 +177,7 @@
             "RNCAndroidDialogPickerComponentDescriptor",
             "RNCAndroidDropdownPickerComponentDescriptor"
           ],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/@react-native-picker/picker/android/src/main/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/@react-native-picker/picker/android/src/main/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -80,22 +186,22 @@
       }
     },
     "react-native-camera": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\react-native-camera",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-camera",
       "name": "react-native-camera",
       "platforms": {
         "ios": {
-          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-camera\\react-native-camera.podspec",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-camera\\react-native-camera.podspec",
           "version": "4.2.1",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\react-native-camera\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-camera\\android",
           "packageImportPath": "import org.reactnative.camera.RNCameraPackage;",
           "packageInstance": "new RNCameraPackage()",
           "buildTypes": [],
           "componentDescriptors": [],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/react-native-camera/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/react-native-camera/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -104,22 +210,22 @@
       }
     },
     "react-native-fs": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\react-native-fs",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-fs",
       "name": "react-native-fs",
       "platforms": {
         "ios": {
-          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-fs\\RNFS.podspec",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-fs\\RNFS.podspec",
           "version": "2.20.0",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\react-native-fs\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-fs\\android",
           "packageImportPath": "import com.rnfs.RNFSPackage;",
           "packageInstance": "new RNFSPackage()",
           "buildTypes": [],
           "componentDescriptors": [],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/react-native-fs/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/react-native-fs/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -128,17 +234,17 @@
       }
     },
     "react-native-gesture-handler": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\react-native-gesture-handler",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-gesture-handler",
       "name": "react-native-gesture-handler",
       "platforms": {
         "ios": {
-          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-gesture-handler\\RNGestureHandler.podspec",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-gesture-handler\\RNGestureHandler.podspec",
           "version": "2.19.0",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\react-native-gesture-handler\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-gesture-handler\\android",
           "packageImportPath": "import com.swmansion.gesturehandler.RNGestureHandlerPackage;",
           "packageInstance": "new RNGestureHandlerPackage()",
           "buildTypes": [],
@@ -147,7 +253,7 @@
             "RNGestureHandlerButtonComponentDescriptor",
             "RNGestureHandlerRootViewComponentDescriptor"
           ],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/react-native-gesture-handler/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -156,23 +262,23 @@
       }
     },
     "react-native-image-picker": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\react-native-image-picker",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-image-picker",
       "name": "react-native-image-picker",
       "platforms": {
         "ios": {
-          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-image-picker\\react-native-image-picker.podspec",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-image-picker\\react-native-image-picker.podspec",
           "version": "7.1.2",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\react-native-image-picker\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-image-picker\\android",
           "packageImportPath": "import com.imagepicker.ImagePickerPackage;",
           "packageInstance": "new ImagePickerPackage()",
           "buildTypes": [],
           "libraryName": "RNImagePickerSpec",
           "componentDescriptors": [],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/react-native-image-picker/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -205,23 +311,23 @@
       }
     },
     "react-native-permissions": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\react-native-permissions",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-permissions",
       "name": "react-native-permissions",
       "platforms": {
         "ios": {
-          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-permissions\\RNPermissions.podspec",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-permissions\\RNPermissions.podspec",
           "version": "4.1.5",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\react-native-permissions\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-permissions\\android",
           "packageImportPath": "import com.zoontek.rnpermissions.RNPermissionsPackage;",
           "packageInstance": "new RNPermissionsPackage()",
           "buildTypes": [],
           "libraryName": "RNPermissionsSpec",
           "componentDescriptors": [],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/react-native-permissions/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -230,23 +336,25 @@
       }
     },
     "react-native-reanimated": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\react-native-reanimated",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-reanimated",
       "name": "react-native-reanimated",
       "platforms": {
         "ios": {
           "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-reanimated\\RNReanimated.podspec",
           "version": "3.15.2",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-reanimated\\RNReanimated.podspec",
+          "version": "3.15.1",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\react-native-reanimated\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-reanimated\\android",
           "packageImportPath": "import com.swmansion.reanimated.ReanimatedPackage;",
           "packageInstance": "new ReanimatedPackage()",
           "buildTypes": [],
           "libraryName": "rnreanimated",
           "componentDescriptors": [],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/react-native-reanimated/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -255,17 +363,17 @@
       }
     },
     "react-native-safe-area-context": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\react-native-safe-area-context",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-safe-area-context",
       "name": "react-native-safe-area-context",
       "platforms": {
         "ios": {
-          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-safe-area-context\\react-native-safe-area-context.podspec",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-safe-area-context\\react-native-safe-area-context.podspec",
           "version": "4.11.0",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\react-native-safe-area-context\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-safe-area-context\\android",
           "packageImportPath": "import com.th3rdwave.safeareacontext.SafeAreaContextPackage;",
           "packageInstance": "new SafeAreaContextPackage()",
           "buildTypes": [],
@@ -274,7 +382,7 @@
             "RNCSafeAreaProviderComponentDescriptor",
             "RNCSafeAreaViewComponentDescriptor"
           ],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -283,17 +391,17 @@
       }
     },
     "react-native-screens": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\react-native-screens",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-screens",
       "name": "react-native-screens",
       "platforms": {
         "ios": {
-          "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-screens\\RNScreens.podspec",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-screens\\RNScreens.podspec",
           "version": "3.34.0",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\react-native-screens\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-screens\\android",
           "packageImportPath": "import com.swmansion.rnscreens.RNScreensPackage;",
           "packageInstance": "new RNScreensPackage()",
           "buildTypes": [],
@@ -309,7 +417,7 @@
             "RNSScreenComponentDescriptor",
             "RNSModalScreenComponentDescriptor"
           ],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/react-native-screens/android/src/main/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -318,17 +426,19 @@
       }
     },
     "react-native-svg": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\react-native-svg",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-svg",
       "name": "react-native-svg",
       "platforms": {
         "ios": {
           "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-svg\\RNSVG.podspec",
           "version": "15.7.1",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-svg\\RNSVG.podspec",
+          "version": "15.6.0",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\react-native-svg\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-svg\\android",
           "packageImportPath": "import com.horcrux.svg.SvgPackage;",
           "packageInstance": "new SvgPackage()",
           "buildTypes": [],
@@ -361,7 +471,7 @@
             "RNSVGTSpanComponentDescriptor",
             "RNSVGUseComponentDescriptor"
           ],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/react-native-svg/android/src/main/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -370,23 +480,25 @@
       }
     },
     "react-native-vector-icons": {
-      "root": "C:\\Drink2\\frontend\\node_modules\\react-native-vector-icons",
+      "root": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-vector-icons",
       "name": "react-native-vector-icons",
       "platforms": {
         "ios": {
           "podspecPath": "C:\\Drink2\\frontend\\node_modules\\react-native-vector-icons\\RNVectorIcons.podspec",
           "version": "10.2.0",
+          "podspecPath": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-vector-icons\\RNVectorIcons.podspec",
+          "version": "10.1.0",
           "configurations": [],
           "scriptPhases": []
         },
         "android": {
-          "sourceDir": "C:\\Drink2\\frontend\\node_modules\\react-native-vector-icons\\android",
+          "sourceDir": "C:\\MeetSipDrink\\frontend\\node_modules\\react-native-vector-icons\\android",
           "packageImportPath": "import com.oblador.vectoricons.VectorIconsPackage;",
           "packageInstance": "new VectorIconsPackage()",
           "buildTypes": [],
           "libraryName": "RNVectorIconsSpec",
           "componentDescriptors": [],
-          "cmakeListsPath": "C:/Drink2/frontend/node_modules/react-native-vector-icons/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cmakeListsPath": "C:/MeetSipDrink/frontend/node_modules/react-native-vector-icons/android/build/generated/source/codegen/jni/CMakeLists.txt",
           "cxxModuleCMakeListsModuleName": null,
           "cxxModuleCMakeListsPath": null,
           "cxxModuleHeaderName": null,
@@ -556,7 +668,7 @@
         {
           "name": "--path <path>",
           "description": "Path to the React Native project root.",
-          "default": "C:\\Drink2\\frontend"
+          "default": "C:\\MeetSipDrink\\frontend"
         },
         {
           "name": "--platform <string>",
@@ -844,10 +956,10 @@
   "project": {
     "ios": null,
     "android": {
-      "sourceDir": "C:\\Drink2\\frontend\\android",
+      "sourceDir": "C:\\MeetSipDrink\\frontend\\android",
       "appName": "app",
-      "packageName": "com.MeetSipDrink",
-      "applicationId": "com.MeetSipDrink",
+      "packageName": "com.meetsipdrink.app",
+      "applicationId": "com.meetsipdrink.app",
       "mainActivity": ".MainActivity",
       "assets": []
     }

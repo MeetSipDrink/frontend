@@ -1,4 +1,4 @@
-package com.MeetSipDrink
+package com.meetsipdrink.app
 
 import com.facebook.react.ReactActivity
 import com.facebook.react.ReactActivityDelegate

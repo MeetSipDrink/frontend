@@ -177,12 +177,11 @@ const BoardViewPage = ({ route, navigation }) => {
 
         try {
             const requestBody = {
+                memberId: loggedInUserId,
                 content: newCommentContent,
             };
 
-            await axios.post(`${API_URL}/posts/${postId}/comment`, requestBody, {
-                params: { memberId: loggedInUserId }
-            });
+            await axios.post(`${API_URL}/posts/${postId}/comment`, requestBody);
             setNewCommentContent('');
             fetchComments();
 
@@ -192,6 +191,27 @@ const BoardViewPage = ({ route, navigation }) => {
         } catch (error) {
             console.error('댓글 작성 실패:', error);
             Alert.alert('오류', '댓글 작성에 실패했습니다. 다시 시도해주세요.');
+        }
+    };
+
+    // 알림을 보내는 함수
+    const sendNotification = async (title, message) => {
+        try {
+            const notificationData = {
+                title: title,
+                message: message,
+            };
+
+            await fetch('http://10.0.2.2:8080/api/notifications/post', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(notificationData),
+            });
+
+        } catch (error) {
+            console.error('알림 전송 오류:', error);
         }
     };
 
