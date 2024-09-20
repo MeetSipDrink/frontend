@@ -132,6 +132,30 @@
         }
       }
     },
+    "react-native-keychain": {
+      "root": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-keychain",
+      "name": "react-native-keychain",
+      "platforms": {
+        "ios": {
+          "podspecPath": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-keychain/RNKeychain.podspec",
+          "version": "8.2.0",
+          "configurations": [],
+          "scriptPhases": []
+        },
+        "android": {
+          "sourceDir": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-keychain/android",
+          "packageImportPath": "import com.oblador.keychain.KeychainPackage;",
+          "packageInstance": "new KeychainPackage()",
+          "buildTypes": [],
+          "componentDescriptors": [],
+          "cmakeListsPath": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-keychain/android/build/generated/source/codegen/jni/CMakeLists.txt",
+          "cxxModuleCMakeListsModuleName": null,
+          "cxxModuleCMakeListsPath": null,
+          "cxxModuleHeaderName": null,
+          "isPureCxxDependency": false
+        }
+      }
+    },
     "react-native-permissions": {
       "root": "/Users/gimchanjun/Desktop/MeetSipDrink/frontend/node_modules/react-native-permissions",
       "name": "react-native-permissions",
