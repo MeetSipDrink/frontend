@@ -9,13 +9,10 @@ import {
   Alert,
 } from 'react-native';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import messaging from '@react-native-firebase/messaging';
-
-const ADS_API_URL = 'http://10.0.2.2:8080';
 import * as Keychain from 'react-native-keychain';
 
-const AD_API_URL = 'http://10.0.2.2:8080';
+const ADS_API_URL = 'http://10.0.2.2:8080';
 
 const FloatingLabelInput = ({label, value, onChangeText, secureTextEntry}) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -70,7 +67,6 @@ const FloatingLabelInput = ({label, value, onChangeText, secureTextEntry}) => {
 export default function LoginPage({navigation}) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [fcmToken, setFcmToken] = useState('');
 
   const saveToKeychain = async (accessToken, refreshToken) => {
     try {
@@ -92,7 +88,6 @@ export default function LoginPage({navigation}) {
 
     try {
       const token = await messaging().getToken();
-      console.log('[FCM Token]: ', token);
 
       const response = await axios.post(`${ADS_API_URL}/members/login`, {
         username,
