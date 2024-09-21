@@ -1,27 +1,18 @@
-import React, { useState, useCallback } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
-import * as Keychain from 'react-native-keychain';
-import { useFocusEffect } from '@react-navigation/native';
+import { useAuth } from '../../../../AuthContext';
 
 const BottomNavigation = ({ navigation }) => {
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const { isLoggedIn, checkLoginStatus } = useAuth();
 
-    const checkLoginStatus = useCallback(async () => {
-        try {
-            const credentials = await Keychain.getGenericPassword();
-            setIsLoggedIn(!!credentials);
-        } catch (error) {
-            console.error('Error checking login status:', error);
-            setIsLoggedIn(false);
-        }
-    }, []);
-
-    useFocusEffect(
-        useCallback(() => {
+    React.useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
             checkLoginStatus();
-        }, [checkLoginStatus])
-    );
+        });
+
+        return unsubscribe;
+    }, [navigation, checkLoginStatus]);
 
     const handleNavigation = (routeName) => {
         if (isLoggedIn || routeName === 'Home' || routeName === 'BoardList') {

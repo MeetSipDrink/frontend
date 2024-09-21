@@ -4,6 +4,7 @@ import {createStackNavigator} from '@react-navigation/stack';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {PermissionsAndroid, Platform} from 'react-native';
+import { AuthProvider } from './AuthContext';
 
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
@@ -187,7 +188,8 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
+      <AuthProvider>
+      <NavigationContainer>
       <Stack.Navigator initialRouteName="MainTab">
         <Stack.Screen
           name="MainTab"
@@ -291,5 +293,6 @@ export default function App() {
         />
       </Stack.Navigator>
     </NavigationContainer>
+        </AuthProvider>
   );
 }
