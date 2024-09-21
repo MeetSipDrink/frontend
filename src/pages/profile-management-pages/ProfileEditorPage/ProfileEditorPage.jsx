@@ -3,7 +3,6 @@ import { StyleSheet, View, Text, TouchableOpacity, TextInput, ScrollView, Alert,
 import axios from 'axios';
 import * as Keychain from "react-native-keychain";
 
-
 const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
 
 export default function ProfileEditorPage({ route, navigation }) {
@@ -16,60 +15,62 @@ export default function ProfileEditorPage({ route, navigation }) {
         userInfo.alcoholType2,
         userInfo.alcoholType3
     ].filter(Boolean));
+    const [originalNickname, setOriginalNickname] = useState(userInfo.nickname);
 
     useEffect(() => {
         if (!route.params?.userInfo) {
             Alert.alert('오류', '사용자 정보를 불러올 수 없습니다.');
             navigation.goBack();
+        } else {
+            setOriginalNickname(route.params.userInfo.nickname);
         }
     }, [route.params?.userInfo, navigation]);
 
     const handleUpdate = async () => {
-        if (!nicknameChecked && userInfo.nickname !== route.params?.userInfo.nickname) {
-            Alert.alert('오류', '닉네임 중복 검사를 먼저 진행해주세요.');
+        if (userInfo.nickname !== originalNickname && !nicknameChecked) {
+            Alert.alert('알림', '닉네임이 변경되었습니다. 중복 검사를 진행해주세요.');
             return;
         }
         const credentials = await Keychain.getGenericPassword();
         if (credentials) {
             const { accessToken } = JSON.parse(credentials.password);
-        try {
-            setLoading(true);
-            const updatedFields = {
-                nickname: userInfo.nickname,
-                profileImage: profileImage,
-                alcoholType1: alcoholTypes[0] || '',
-                alcoholType2: alcoholTypes[1] || '',
-                alcoholType3: alcoholTypes[2] || '',
-            };
+            try {
+                setLoading(true);
+                const updatedFields = {
+                    nickname: userInfo.nickname,
+                    profileImage: profileImage,
+                    alcoholType1: alcoholTypes[0] || '',
+                    alcoholType2: alcoholTypes[1] || '',
+                    alcoholType3: alcoholTypes[2] || '',
+                };
 
-            console.log('Sending update request with data:', updatedFields);
+                console.log('Sending update request with data:', updatedFields);
 
-            const response = await axios.patch(`${ADS_API_URL}/members`, updatedFields,{
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            });
-            console.log('Update response:', response.data);
-
-            if (response.data && response.data.data) {
-                Alert.alert('성공', '프로필이 업데이트되었습니다.');
-                // 업데이트된 데이터로 상태를 직접 설정
-                setUserInfo({
-                    ...userInfo,
-                    ...updatedFields,
+                const response = await axios.patch(`${ADS_API_URL}/members`, updatedFields, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
                 });
-                navigation.navigate('MyPage', { profileUpdated: true });
-            } else {
-                throw new Error('Invalid response from server');
-            }
+                console.log('Update response:', response.data);
 
-        } catch (error) {
-            console.error('Error updating profile:', error.response ? error.response.data : error.message);
-            Alert.alert('오류', `프로필 업데이트에 실패했습니다: ${error.response ? error.response.data.message : error.message}`);
-        } finally {
-            setLoading(false);
+                if (response.data && response.data.data) {
+                    Alert.alert('성공', '프로필이 업데이트되었습니다.');
+                    setUserInfo({
+                        ...userInfo,
+                        ...updatedFields,
+                    });
+                    navigation.navigate('MyPage', { profileUpdated: true });
+                } else {
+                    throw new Error('Invalid response from server');
+                }
+            } catch (error) {
+                console.error('Error updating profile:', error.response ? error.response.data : error.message);
+                Alert.alert('오류', `프로필 업데이트에 실패했습니다: ${error.response ? error.response.data.message : error.message}`);
+            } finally {
+                setLoading(false);
+            }
         }
-   } };
+    };
 
     const checkNickname = async () => {
         if (!userInfo.nickname) {
@@ -83,22 +84,28 @@ export default function ProfileEditorPage({ route, navigation }) {
             return;
         }
 
-        try {
-            const response = await axios.get(`${ADS_API_URL}/members/${userInfo.nickname}`);
-            // axios는 200번대 상태 코드를 성공으로 처리합니다.
-            // 여기서는 200 OK가 중복된 닉네임을 의미합니다.
-            Alert.alert('오류', '이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.');
-            setNicknameChecked(false);
-        } catch (error) {
-            if (error.response && error.response.status === 500) {
-                // 500 에러는 중복되지 않은 닉네임을 의미합니다.
-                Alert.alert('성공', '사용 가능한 닉네임입니다.');
-                setNicknameChecked(true);
-            } else {
-                // 기타 다른 에러에 대한 처리
-                console.error('닉네임 중복 확인 중 오류 발생:', error);
-                Alert.alert('오류', '닉네임 중복 확인 중 문제가 발생했습니다. 다시 시도해주세요.');
+        if (userInfo.nickname === originalNickname) {
+            // 원래 닉네임과 동일한 경우 무조건 성공
+            Alert.alert('성공', '사용 가능한 닉네임입니다.');
+            setNicknameChecked(true);
+        } else {
+            try {
+                const response = await axios.get(`${ADS_API_URL}/members/${userInfo.nickname}`);
+                // axios는 200번대 상태 코드를 성공으로 처리합니다.
+                // 여기서는 200 OK가 중복된 닉네임을 의미합니다.
+                Alert.alert('오류', '이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.');
                 setNicknameChecked(false);
+            } catch (error) {
+                if (error.response && error.response.status === 500) {
+                    // 500 에러는 중복되지 않은 닉네임을 의미합니다.
+                    Alert.alert('성공', '사용 가능한 닉네임입니다.');
+                    setNicknameChecked(true);
+                } else {
+                    // 기타 다른 에러에 대한 처리
+                    console.error('닉네임 중복 확인 중 오류 발생:', error);
+                    Alert.alert('오류', '닉네임 중복 확인 중 문제가 발생했습니다. 다시 시도해주세요.');
+                    setNicknameChecked(false);
+                }
             }
         }
     };
@@ -128,17 +135,10 @@ export default function ProfileEditorPage({ route, navigation }) {
         setAlcoholTypes(newAlcoholTypes);
     };
 
-    const pickImage = async () => {
-        let result = await ImagePicker.launchImageLibraryAsync({
-            mediaTypes: ImagePicker.MediaTypeOptions.Images,
-            allowsEditing: true,
-            aspect: [4, 3],
-            quality: 1,
-        });
-
-        if (!result.canceled) {
-            setProfileImage(result.assets[0].uri);
-        }
+    const pickImage = () => {
+        // 이미지 선택 로직을 여기에 구현합니다.
+        // 실제 구현은 react-native-image-picker나 expo-image-picker 등의 라이브러리를 사용해야 합니다.
+        Alert.alert('알림', '이미지 선택 기능은 현재 구현되지 않았습니다.');
     };
 
     return (
@@ -189,7 +189,6 @@ export default function ProfileEditorPage({ route, navigation }) {
             <TouchableOpacity
                 style={[styles.button, loading && styles.disabledButton]}
                 onPress={handleUpdate}
-                disabled={loading || (userInfo.nickname !== route.params?.userInfo.nickname && !nicknameChecked)}
             >
                 <Text style={styles.buttonText}>
                     {loading ? '업데이트 중...' : '프로필 업데이트'}

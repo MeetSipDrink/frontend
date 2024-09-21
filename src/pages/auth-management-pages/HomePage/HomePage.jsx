@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, PanResponder, Dimensions, Animated, Alert } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import * as Keychain from 'react-native-keychain';
 import axios from 'axios';
-import { useAuth } from '../../../AuthContext';
 import Homeimg from './MainImage/Homeimg';
 import homeB1 from '../../../assets/images/homeB1.png';
 import homeB2 from '../../../assets/images/homeB2.png';
@@ -15,42 +15,53 @@ import Roulette from './Roulette/Roulette';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const ROULETTE_HEIGHT = SCREEN_HEIGHT / 10;
-const ADS_API_URL = 'http://10.0.2.2:8080';
+const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
 
-const MainPage = ({ navigation }) => {
-    const { isLoggedIn, logout, checkLoginStatus } = useAuth();
-    const [userName, setUserName] = useState('');
+const MainPage = () => {
+    const navigation = useNavigation();
     const panY = useRef(new Animated.Value(-100)).current;
     const [spinning, setSpinning] = useState(false);
     const [isResultShown, setIsResultShown] = useState(false);
     const [slowSpinning, setSlowSpinning] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userName, setUserName] = useState('');
 
-    const fetchUserInfo = useCallback(async () => {
+    const checkLoginStatus = async () => {
         try {
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                setIsLoggedIn(true);
+                await fetchUserInfo(credentials);
+            } else {
+                setIsLoggedIn(false);
+                setUserName('');
+            }
+        } catch (error) {
+            console.error('Error checking login status:', error);
+            setIsLoggedIn(false);
+            setUserName('');
+        }
+    };
+
+    const fetchUserInfo = async (credentials) => {
+        try {
+            const { accessToken } = JSON.parse(credentials.password);
             const response = await axios.get(`${ADS_API_URL}/members`, {
                 headers: {
-                    Authorization: `Bearer ${await getAccessToken()}`,
+                    Authorization: `Bearer ${accessToken}`,
                 },
             });
-            setUserName(response.data.data.nickname);
+            setUserName(response.data.data.nickname || '사용자');
         } catch (error) {
             console.error('Error fetching user info:', error);
-            setUserName('');
-            logout();
+            setUserName('사용자');
         }
-    }, [logout]);
-
-    useEffect(() => {
-        checkLoginStatus();
-    }, [checkLoginStatus]);
+    };
 
     useFocusEffect(
-        useCallback(() => {
+        React.useCallback(() => {
             checkLoginStatus();
-            if (isLoggedIn) {
-                fetchUserInfo();
-            }
-        }, [isLoggedIn, checkLoginStatus, fetchUserInfo])
+        }, [])
     );
 
     const handleMyPageNavigation = () => {
