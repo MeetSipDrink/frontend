@@ -1,8 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, PanResponder, Dimensions, Animated, Alert } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import * as Keychain from 'react-native-keychain';
 import axios from 'axios';
+import { useAuth } from '../../../AuthContext';
 import Homeimg from './MainImage/Homeimg';
 import homeB1 from '../../../assets/images/homeB1.png';
 import homeB2 from '../../../assets/images/homeB2.png';
@@ -15,89 +15,47 @@ import Roulette from './Roulette/Roulette';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const ROULETTE_HEIGHT = SCREEN_HEIGHT / 10;
-const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
+const ADS_API_URL = 'http://10.0.2.2:8080';
 
-const MainPage = ({ route, navigation }) => {
-    const [isLoggedIn, setIsLoggedIn] = useState(true);
+const MainPage = ({ navigation }) => {
+    const { isLoggedIn, logout, checkLoginStatus } = useAuth();
+    const [userName, setUserName] = useState('');
     const panY = useRef(new Animated.Value(-100)).current;
     const [spinning, setSpinning] = useState(false);
     const [isResultShown, setIsResultShown] = useState(false);
     const [slowSpinning, setSlowSpinning] = useState(false);
-    const [userName, setUserName] = useState('');
 
-    useEffect(() => {
-        if (route.params?.isLoggedIn === false) {
-            setIsLoggedIn(false);
-        }
-    }, [route.params?.isLoggedIn]);
-
-    const checkLoginStatus = async () => {
+    const fetchUserInfo = useCallback(async () => {
         try {
-            const credentials = await Keychain.getGenericPassword();
-            if (credentials) {
-                const { accessToken } = JSON.parse(credentials.password);
-                if (accessToken) {
-                    setIsLoggedIn(true);
-                    await fetchUserInfo(credentials);
-                } else {
-                    await logout();
-                }
-            } else {
-                setIsLoggedIn(false);
-                setUserName('');
-            }
-        } catch (error) {
-            console.error('Error checking login status:', error);
-            await logout();
-        }
-    };
-
-    const logout = async () => {
-        try {
-            await Keychain.resetGenericPassword();
-            setIsLoggedIn(false);
-            setUserName('');
-        } catch (error) {
-            console.error('Logout error:', error);
-        }
-    };
-
-    const fetchUserInfo = async () => {
-        try {
-            const credentials = await Keychain.getGenericPassword();
-            if (credentials) {
-                const { accessToken } = JSON.parse(credentials.password);
-                const response = await axios.get(`${ADS_API_URL}/members`, {
-                    headers: {
-                        Authorization: `Bearer ${accessToken}`,
-                    },
-                });
-                setUserName(response.data.data.nickname);
-                console.log('User info fetched:', response.data.data.nickname);
-            }
+            const response = await axios.get(`${ADS_API_URL}/members`, {
+                headers: {
+                    Authorization: `Bearer ${await getAccessToken()}`,
+                },
+            });
+            setUserName(response.data.data.nickname);
         } catch (error) {
             console.error('Error fetching user info:', error);
-            setUserName('사용자');
+            setUserName('');
+            logout();
         }
-    };
+    }, [logout]);
+
+    useEffect(() => {
+        checkLoginStatus();
+    }, [checkLoginStatus]);
 
     useFocusEffect(
-        React.useCallback(() => {
+        useCallback(() => {
             checkLoginStatus();
-        }, [])
+            if (isLoggedIn) {
+                fetchUserInfo();
+            }
+        }, [isLoggedIn, checkLoginStatus, fetchUserInfo])
     );
 
     const handleMyPageNavigation = () => {
         if (isLoggedIn) {
-            Alert.alert(
-                "마이페이지",
-                "원하시는 작업을 선택해주세요.",
-                [
-                    { text: "마이페이지로 이동", onPress: () => navigation.navigate('MyPage') },
-                    { text: "로그아웃", onPress: logout },
-                    { text: "취소", style: "cancel" }
-                ]
-            );
+            navigation.navigate('MyPage');
         } else {
             navigation.navigate('Login');
         }
