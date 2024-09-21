@@ -9,10 +9,6 @@ import {
   Alert,
 } from 'react-native';
 import axios from 'axios';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import messaging from '@react-native-firebase/messaging';
-
-const ADS_API_URL = 'http://10.0.2.2:8080';
 import * as Keychain from 'react-native-keychain';
 
 const AD_API_URL = 'http://10.0.2.2:8080';
@@ -70,7 +66,6 @@ const FloatingLabelInput = ({label, value, onChangeText, secureTextEntry}) => {
 export default function LoginPage({navigation}) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [fcmToken, setFcmToken] = useState('');
 
   const saveToKeychain = async (accessToken, refreshToken) => {
     try {
@@ -91,28 +86,18 @@ export default function LoginPage({navigation}) {
     }
 
     try {
-      const token = await messaging().getToken();
-      console.log('[FCM Token]: ', token);
-
-      const response = await axios.post(`${ADS_API_URL}/members/login`, {
+      const response = await axios.post(`${AD_API_URL}/members/login`, {
         username,
         password,
-        fcmtoken: token,
       }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
 
-      console.log('Server response status:', response.status);
-      console.log('Server response headers:', response.headers);
 
       if (response.status === 200) {
         const accessToken = response.headers['authorization'];
         const refreshToken = response.headers['refresh'];
 
         if (accessToken && refreshToken) {
-          // Remove 'Bearer ' prefix from accessToken if present
           const cleanAccessToken = accessToken.startsWith('Bearer ') ? accessToken.slice(7) : accessToken;
 
           await saveToKeychain(cleanAccessToken, refreshToken);

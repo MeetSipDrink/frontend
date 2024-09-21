@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, PanResponder, Dimensions, Animated, Alert } from 'react-native';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useFocusEffect } from '@react-navigation/native';
 import * as Keychain from 'react-native-keychain';
 import axios from 'axios';
 import Homeimg from './MainImage/Homeimg';
@@ -17,41 +17,64 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const ROULETTE_HEIGHT = SCREEN_HEIGHT / 10;
 const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
 
-const MainPage = () => {
-    const navigation = useNavigation();
+const MainPage = ({ route, navigation }) => {
+    const [isLoggedIn, setIsLoggedIn] = useState(true);
     const panY = useRef(new Animated.Value(-100)).current;
     const [spinning, setSpinning] = useState(false);
     const [isResultShown, setIsResultShown] = useState(false);
     const [slowSpinning, setSlowSpinning] = useState(false);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [userName, setUserName] = useState('');
+
+    useEffect(() => {
+        if (route.params?.isLoggedIn === false) {
+            setIsLoggedIn(false);
+        }
+    }, [route.params?.isLoggedIn]);
 
     const checkLoginStatus = async () => {
         try {
             const credentials = await Keychain.getGenericPassword();
             if (credentials) {
-                setIsLoggedIn(true);
-                await fetchUserInfo(credentials);
+                const { accessToken } = JSON.parse(credentials.password);
+                if (accessToken) {
+                    setIsLoggedIn(true);
+                    await fetchUserInfo(credentials);
+                } else {
+                    await logout();
+                }
             } else {
                 setIsLoggedIn(false);
                 setUserName('');
             }
         } catch (error) {
             console.error('Error checking login status:', error);
-            setIsLoggedIn(false);
-            setUserName('');
+            await logout();
         }
     };
 
-    const fetchUserInfo = async (credentials) => {
+    const logout = async () => {
         try {
-            const { accessToken } = JSON.parse(credentials.password);
-            const response = await axios.get(`${ADS_API_URL}/members`, {
-                headers: {
-                    Authorization: `Bearer ${accessToken}`,
-                },
-            });
-            setUserName(response.data.data.nickname || '사용자');
+            await Keychain.resetGenericPassword();
+            setIsLoggedIn(false);
+            setUserName('');
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    };
+
+    const fetchUserInfo = async () => {
+        try {
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                const { accessToken } = JSON.parse(credentials.password);
+                const response = await axios.get(`${ADS_API_URL}/members`, {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                });
+                setUserName(response.data.data.nickname);
+                console.log('User info fetched:', response.data.data.nickname);
+            }
         } catch (error) {
             console.error('Error fetching user info:', error);
             setUserName('사용자');
@@ -66,7 +89,15 @@ const MainPage = () => {
 
     const handleMyPageNavigation = () => {
         if (isLoggedIn) {
-            navigation.navigate('MyPage');
+            Alert.alert(
+                "마이페이지",
+                "원하시는 작업을 선택해주세요.",
+                [
+                    { text: "마이페이지로 이동", onPress: () => navigation.navigate('MyPage') },
+                    { text: "로그아웃", onPress: logout },
+                    { text: "취소", style: "cancel" }
+                ]
+            );
         } else {
             navigation.navigate('Login');
         }

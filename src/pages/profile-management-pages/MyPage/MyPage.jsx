@@ -3,12 +3,14 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaVi
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Keychain from 'react-native-keychain';
+import { useAuth } from '../../../AuthContext'; // AuthContext import
 
 const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
 
 export default function MyPage({ navigation }) {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
+    const { isLoggedIn, logout } = useAuth(); // useAuth 훅 사용
 
     const handleLogout = useCallback(async () => {
         try {
@@ -21,18 +23,22 @@ export default function MyPage({ navigation }) {
                     },
                 });
                 await Keychain.resetGenericPassword();
+                logout(); // AuthContext의 logout 함수 호출
                 navigation.navigate('Home'); // 로그아웃 후 홈 페이지로 이동
             }
         } catch (error) {
             console.error('Logout error:', error);
             Alert.alert('로그아웃 실패', '로그아웃 중 오류가 발생했습니다.');
         }
-    }, [navigation]);
+    }, [navigation, logout]);
 
     const fetchUserInfo = useCallback(async () => {
+        if (!isLoggedIn) {
+            setLoading(false);
+            return;
+        }
         setLoading(true);
         try {
-            console.log('Fetching user info...');
             const credentials = await Keychain.getGenericPassword();
             if (credentials) {
                 const { accessToken } = JSON.parse(credentials.password);
@@ -41,7 +47,6 @@ export default function MyPage({ navigation }) {
                         Authorization: `Bearer ${accessToken}`,
                     },
                 });
-                console.log('Response:', response.data);
                 setUserInfo(response.data.data);
             }
         } catch (error) {
@@ -50,7 +55,7 @@ export default function MyPage({ navigation }) {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [isLoggedIn]);
 
     useFocusEffect(
         useCallback(() => {
@@ -62,6 +67,17 @@ export default function MyPage({ navigation }) {
         return (
             <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#F9B300" />
+            </View>
+        );
+    }
+
+    if (!isLoggedIn) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.userInfoText}>로그인이 필요합니다.</Text>
+                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
+                    <Text style={styles.buttonText}>로그인</Text>
+                </TouchableOpacity>
             </View>
         );
     }
