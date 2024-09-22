@@ -2,22 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView, Image, Alert, ActivityIndicator } from "react-native";
 import axios from 'axios';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 const API_URL = 'http://10.0.2.2:8080';
 
-// 테스트 이미지 URL을 사용할 경우, 실제 이미지 업로드 기능을 구현해야 합니다.
-const TEST_IMG_URL = 'https://img.khan.co.kr/news/2023/05/12/news-p.v1.20230512.e5fffd99806f4dcabd8426d52788f51a_P1.png';
-const TEST_IMG_URL2 = 'https://img1.daumcdn.net/thumb/R1280x0/?scode=mtistory2&fname=https%3A%2F%2Fblog.kakaocdn.net%2Fdn%2F15c1u%2FbtrBF5rq2s1%2FuCDT0O1GSpm5WEu8kHzna0%2Fimg.jpg';
-const TEST_IMG_URL3 = 'https://image.blip.kr/v1/file/7c6212f87437d9d26c1a34327e329ccb';
-
-// 로그인한 사용자의 memberId를 1로 고정
 const loggedInUserId = 1;
 
 export default function BoardEditPage() {
     const route = useRoute();
     const navigation = useNavigation();
     const { postId } = route.params;
-
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
     const [images, setImages] = useState([]);
@@ -41,8 +35,8 @@ export default function BoardEditPage() {
                 postData.imageUrl4,
                 postData.imageUrl5,
                 postData.imageUrl6
-            ].filter(Boolean);
-            setImages(postImages);
+            ];
+            setImages(postImages); // 초기값 설정시 null로 초기화하지 않고 서버에서 받아온 값을 그대로 설정
         } catch (err) {
             console.error('게시글 불러오기 실패:', err);
             setError('게시글을 불러오는 데 실패했습니다.');
@@ -62,48 +56,111 @@ export default function BoardEditPage() {
                 memberId: loggedInUserId,
                 title,
                 content,
-                imageUrl1: images[0] || null,
-                imageUrl2: images[1] || null,
-                imageUrl3: images[2] || null,
-                imageUrl4: images[3] || null,
-                imageUrl5: images[4] || null,
-                imageUrl6: images[5] || null,
-            };
+                imageUrl1: images[0],
+                imageUrl2: images[1],
+                imageUrl3: images[2],
+                imageUrl4: images[3],
+                imageUrl5: images[4],
+                imageUrl6: images[5],
+              };
 
-
-            // PATCH 요청 URL을 /posts/{postId}/{memberId}로 변경
             const response = await axios.patch(`${API_URL}/posts/${postId}`, postData, {
                 headers: {
                     'Content-Type': 'application/json',
                 }
             });
 
-            console.log('Response:', response.data);
-
             Alert.alert('성공', '게시물이 수정되었습니다.');
             navigation.goBack();
         } catch (error) {
             if (error.response) {
-                console.error('1 response:', error.response.data);
-                console.error('2 status:', error.response.status);
-                console.error('3 headers:', error.response.headers);
                 Alert.alert('오류', `서버 오류: ${error.response.status}`);
             } else if (error.request) {
-                console.error('Error request:', error.request);
                 Alert.alert('오류', '네트워크 연결을 확인해주세요.');
             } else {
-                console.error('Error message:', error.message);
                 Alert.alert('오류', '요청 중 오류가 발생했습니다.');
             }
         }
     };
 
+    const uploadImageToS3 = async (uri) => {
+        const formData = new FormData();
+        formData.append('multipartFile', {
+            uri: uri,
+            type: 'image/jpeg',
+            name: `image_${new Date().getTime()}.jpg`,
+        });
+
+        try {
+            const response = await fetch(`${API_URL}/images`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            const contentType = response.headers.get('content-type');
+            let result;
+
+            if (contentType && contentType.includes('application/json')) {
+                result = await response.json(); // JSON 형식일 경우 파싱
+            } else {
+                result = await response.text(); // JSON 형식이 아닐 경우 텍스트로 처리
+            }
+
+            if (response.ok) {
+                Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
+                console.log(result);
+                return result;
+            } else {
+                throw new Error(result.message || '이미지 업로드 실패');
+            }
+        } catch (error) {
+            console.error('이미지 업로드 오류:', error);
+            throw error;
+        }
+    };
+
     const pickImage = () => {
-        Alert.alert('알림', '이미지 업로드 기능은 아직 구현되지 않았습니다.');
+        const options = {
+            mediaType: 'photo',
+            maxWidth: 600,
+            maxHeight: 600,
+            quality: 1,
+        };
+
+        launchImageLibrary(options, async (response) => {
+            if (response.didCancel) {
+                Alert.alert('알림', '이미지 선택이 취소되었습니다.');
+            } else if (response.errorMessage) {
+                Alert.alert('에러', '이미지를 선택하는 중 오류가 발생했습니다.');
+            } else {
+                const uri = response.assets[0].uri;
+
+                try {
+                    const uploadedImageUrl = await uploadImageToS3(uri);
+
+                    const newImages = [...images];
+                    const emptyIndex = newImages.findIndex(image => !image);
+                    if (emptyIndex !== -1) {
+                        newImages[emptyIndex] = uploadedImageUrl;
+                    } else {
+                        newImages.push(uploadedImageUrl);
+                    }
+                    setImages(newImages);
+
+                } catch (error) {
+                    Alert.alert('오류', '이미지 업로드 중 문제가 발생했습니다.');
+                }
+            }
+        });
     };
 
     const removeImage = (index) => {
-        setImages(images.filter((_, i) => i !== index));
+        const newImages = [...images];
+        newImages[index] = null;
+        setImages(newImages);
     };
 
     if (loading) {
@@ -140,15 +197,16 @@ export default function BoardEditPage() {
                 onChangeText={setContent}
                 multiline
             />
-            {/* 이미지 추가 및 삭제 기능 */}
             <View style={styles.imagesContainer}>
                 {images.map((img, index) => (
-                    <View key={index} style={styles.imageWrapper}>
-                        <Image source={{ uri: img }} style={styles.image} />
-                        <TouchableOpacity style={styles.removeImageButton} onPress={() => removeImage(index)}>
-                            <Text style={styles.removeImageButtonText}>X</Text>
-                        </TouchableOpacity>
-                    </View>
+                    img ? (
+                        <View key={index} style={styles.imageWrapper}>
+                            <Image source={{ uri: img }} style={styles.image} />
+                            <TouchableOpacity style={styles.removeImageButton} onPress={() => removeImage(index)}>
+                                <Text style={styles.removeImageButtonText}>X</Text>
+                            </TouchableOpacity>
+                        </View>
+                    ) : null
                 ))}
             </View>
             <TouchableOpacity style={styles.imageButton} onPress={pickImage}>

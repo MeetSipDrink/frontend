@@ -1,13 +1,15 @@
-import React, {useState, useEffect} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import React, { useState, useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {PermissionsAndroid, Platform} from 'react-native';
 import { AuthProvider } from './AuthContext';
 
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
+
+import { LogBox } from 'react-native';
 
 // 커스텀 BottomNavigation 컴포넌트 불러오기
 import BottomNavigation from './pages/auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
@@ -16,6 +18,7 @@ import BottomNavigation from './pages/auth-management-pages/HomePage/bottomNavig
 import HomePage from './pages/auth-management-pages/HomePage/HomePage';
 import LoginPage from './pages/auth-management-pages/LoginPage/LoginPage';
 import SignUpFormPage from './pages/auth-management-pages/SignUpFormPage/SignUpFormPage';
+import AdultAuthPage from './pages/auth-management-pages/AdultAuthPage/AdultAuthPage';
 import SignUpAgreementPage from './pages/auth-management-pages/SignUpAgreementPage/SignUpAgreementPage';
 import MyPage from './pages/profile-management-pages/MyPage/MyPage';
 import FriendListPage from './pages/profile-management-pages/FriendListPage/FriendListPage';
@@ -38,9 +41,12 @@ import NoticeViewPage from './pages/admin-management-pages/NoticeViewPage/Notice
 import NoticeEditPage from './pages/admin-management-pages/NoticeEditPage/NoticeEditPage';
 import ChatRoomEditPage from './pages/communication-tools-pages/ChatRoomEditPage/ChatRoomEditPage';
 import ReportListPage from './pages/admin-management-pages/ReportListPage/ReportListPage';
+import CreateChatRoom from './pages/communication-tools-pages/ChatRoomEditPage/CreateChatRoom';
 
 // LoadingPage 불러오기
 import LoadingPage from './pages/auth-management-pages/LoadingPage/LoadingPage';
+
+LogBox.ignoreLogs(['TextElement: Support for defaultProps']);
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -74,36 +80,36 @@ const requestNotificationPermission = async () => {
 // 커스텀 BottomNavigation을 사용하는 메인 탭 네비게이터
 function MainTabNavigator() {
   return (
-    <Tab.Navigator tabBar={props => <BottomNavigation {...props} />}>
+    <Tab.Navigator tabBar={(props) => <BottomNavigation {...props} />}>
       <Tab.Screen
         name="Home"
         component={HomePage}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
       <Tab.Screen
         name="ChatRoomList"
         component={ChatRoomListPage}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
       <Tab.Screen
         name="BoardList"
         component={BoardListPage}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
       <Tab.Screen
         name="MyPage"
         component={MyPage}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
       <Tab.Screen
         name="Roulette"
         component={RoulettePage}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="BotResponse"
         component={BotResponsePage}
-        options={{headerShown: false}}
+        options={{ headerShown: false }}
       />
     </Tab.Navigator>
   );
@@ -194,102 +200,113 @@ export default function App() {
         <Stack.Screen
           name="MainTab"
           component={MainTabNavigator}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="Login"
           component={LoginPage}
-          options={{headerShown: true, headerTitle: ''}}
+          options={{ headerShown: true, headerTitle: '' }}
         />
         <Stack.Screen
           name="SignUpForm"
           component={SignUpFormPage}
-          options={{headerShown: true, headerTitle: ''}}
+          options={{ headerShown: true, headerTitle: '' }}
+        />
+        <Stack.Screen
+          name="SignUpAdultAuth"
+          component={AdultAuthPage}
+          options={{headerShown: true, headerTitle: '성인인증'}}
         />
         <Stack.Screen
           name="SignUpAgreement"
           component={SignUpAgreementPage}
-          options={{headerShown: true, headerTitle: '회원가입'}}
+          options={{ headerShown: true, headerTitle: '회원가입' }}
         />
         <Stack.Screen
           name="FriendList"
           component={FriendListPage}
-          options={{headerShown: true, headerTitle: ''}}
+          options={{ headerShown: true, headerTitle: '' }}
         />
         <Stack.Screen
           name="FriendRequest"
           component={FriendRequestPage}
-          options={{headerShown: true, headerTitle: ''}}
+          options={{ headerShown: true, headerTitle: '' }}
         />
         <Stack.Screen
           name="BlockList"
           component={BlockListPage}
-          options={{headerShown: true, headerTitle: ''}}
+          options={{ headerShown: true, headerTitle: '' }}
         />
         <Stack.Screen
           name="ProfileEditor"
           component={ProfileEditorPage}
-          options={{headerShown: true, headerTitle: '프로필 수정'}}
+          options={{ headerShown: true, headerTitle: '프로필 수정' }}
         />
         <Stack.Screen
           name="BoardView"
           component={BoardViewPage}
-          options={{headerShown: true, headerTitle: ''}}
+          options={{ headerShown: true, headerTitle: '' }}
         />
         <Stack.Screen
           name="BoardPost"
           component={BoardPostPage}
-          options={{headerShown: false}}
+          options={{ headerShown: true, headerTitle: '게시글 작성' }}
         />
         <Stack.Screen
           name="BoardEdit"
           component={BoardEditPage}
-          options={{headerShown: true, headerTitle: '게시글 수정'}}
+          options={{ headerShown: true, headerTitle: '게시글 수정' }}
         />
         <Stack.Screen
           name="ChatRoomEdit"
           component={ChatRoomEditPage}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="ChatRoom"
           component={ChatRoomPage}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="VideoChat"
           component={VideoChatPage}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="UserSearchList"
           component={UserSearchListPage}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="NoticeList"
           component={NoticeListPage}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="NoticeView"
           component={NoticeViewPage}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="NoticePost"
           component={NoticePostPage}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="NoticeEdit"
           component={NoticeEditPage}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="ReportList"
           component={ReportListPage}
-          options={{headerShown: false}}
+          options={{ headerShown: false }}
+        />
+        {/* 채팅방 생성 페이지 추가 */}
+        <Stack.Screen
+          name="CreateChatRoom"
+          component={CreateChatRoom}
+          options={{ headerShown: true, headerTitle: '채팅방 생성' }}
         />
       </Stack.Navigator>
     </NavigationContainer>

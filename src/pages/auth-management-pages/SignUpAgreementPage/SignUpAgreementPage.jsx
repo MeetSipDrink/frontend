@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TouchableOpacity,
   View,
@@ -10,32 +10,24 @@ import {
   Image,
 } from 'react-native';
 import axios from 'axios';
-import {useNavigation} from '@react-navigation/native';
-import defaultProfileImage from '../../../assets/images/profileImage.png';
-
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { launchImageLibrary } from 'react-native-image-picker';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const ADS_API_URL = 'http://10.0.2.2:8080';
 
-const uploadImageToS3 = async uri => {
-  // 실제 S3 업로드 로직 구현
-  return (
-    'https://fake-s3-bucket.amazonaws.com/' +
-    Math.random().toString(36).substring(7) +
-    '.jpg'
-  );
-};
-
 export default function SignUpFormPage() {
+  const route = useRoute();
+  const navigation = useNavigation();
+  
+  const { name: fixedName, gender: fixedGender, age: fixedAge } = route.params;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [profileImage, setProfileImage] = useState('');
+  const [profileImage, setProfileImage] = useState('https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png');
+  const [profileImageUrl, setProfileImageUrl] = useState('https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png');
   const [nickname, setNickname] = useState('');
   const [nicknameChecked, setNicknameChecked] = useState(false);
-  const [gender, setGender] = useState('');
-  const [name, setName] = useState('');
-  const [age, setAge] = useState('');
   const [alcoholTypes, setAlcoholTypes] = useState(['', '', '']);
-  const navigation = useNavigation();
 
   const handleAlcoholTypeChange = (index, value) => {
     const newAlcoholTypes = [...alcoholTypes];
@@ -43,22 +35,74 @@ export default function SignUpFormPage() {
     setAlcoholTypes(newAlcoholTypes);
   };
 
-  const handleImagePick = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
+  // 이미지 선택 및 S3에 업로드하는 함수
+  const handleImagePick = () => {
+    const options = {
+      mediaType: 'photo',
+      maxWidth: 600,
+      maxHeight: 600,
       quality: 1,
-    });
+    };
 
-    if (!result.canceled) {
-      const imageUrl = await uploadImageToS3(result.assets[0].uri);
-      setProfileImage(imageUrl);
-    }
+    launchImageLibrary(options, async (response) => {
+      if (response.didCancel) {
+        Alert.alert('알림', '이미지 선택이 취소되었습니다.');
+      } else if (response.errorMessage) {
+        Alert.alert('에러', '이미지를 선택하는 중 오류가 발생했습니다.');
+      } else {
+        const uri = response.assets[0].uri;
+        setProfileImage(uri); // 선택한 이미지를 로컬에 저장
+
+        // 이미지 업로드 (S3로 업로드)
+        const formData = new FormData();
+        formData.append('multipartFile', {
+          uri: uri,
+          type: 'image/jpeg',
+          name: `profile_${new Date().getTime()}.jpg`,
+        });
+
+        try {
+          const uploadResponse = await fetch(`${ADS_API_URL}/images`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+
+          const contentType = uploadResponse.headers.get('content-type');
+          let result;
+
+          if (contentType && contentType.includes('application/json')) {
+            result = await uploadResponse.json(); // JSON 형식일 경우 파싱
+          } else {
+            result = await uploadResponse.text();
+          }
+
+          if (uploadResponse.ok) {
+            const uploadedImageUrl = typeof result === 'string' ? result : result.imageUrl;
+            setProfileImageUrl(uploadedImageUrl); // S3 URL 저장
+            Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
+          } else {
+            Alert.alert('실패', '이미지 업로드에 실패했습니다.');
+            console.error(result);
+          }
+        } catch (error) {
+          console.error('이미지 업로드 오류:', error);
+          Alert.alert('에러', '이미지를 업로드하는 중 오류가 발생했습니다.');
+        }
+      }
+    });
+  };
+
+  // 프로필 이미지 삭제
+  const removeProfileImage = () => {
+    setProfileImage('https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png');
+    setProfileImageUrl('https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png');
   };
 
   const validateInputs = () => {
-    if (!email || !password || !name || !age || !nickname || !alcoholTypes[0]) {
+    if (!email || !password || !nickname || !alcoholTypes[0]) {
       Alert.alert('오류', '필수 필드를 모두 입력해주세요.');
       return false;
     }
@@ -69,45 +113,36 @@ export default function SignUpFormPage() {
       );
       return false;
     }
-    if (!/^[MF]$/.test(gender)) {
-      Alert.alert('오류', "성별을 'M' 또는 'F'로 입력해 주세요.");
-      return false;
-    }
     return true;
   };
 
   const checkNickname = async () => {
-    // 닉네임 중복 검사 로직 (주석 처리)
-    /*
-        if (!nickname) {
-            Alert.alert('오류', '닉네임을 입력해주세요.');
-            return;
-        }
+    if (!nickname) {
+        Alert.alert('오류', '닉네임을 입력해주세요.');
+        return;
+    }
 
-        const nicknameRegex = /^[a-zA-Z0-9가-힣]{2,8}$/;
-        if (!nicknameRegex.test(nickname)) {
-            Alert.alert('오류', '특수문자 제외 2자 이상 8자 이하로 입력해주세요.');
-            return;
-        }
-
+    const nicknameRegex = /^[a-zA-Z0-9가-힣]{2,8}$/;
+    if (!nicknameRegex.test(nickname)) {
+        Alert.alert('오류', '특수문자 제외 2자 이상 8자 이하로 입력해주세요.');
+        return;
+    }
+    else {
         try {
-            const response = await axios.get(`${ADS_API_URL}/search/${nickname}`);
-            const isAvailable = response.data;
-            if (isAvailable) {
+            const response = await axios.get(`${ADS_API_URL}/members/${nickname}`);
+            Alert.alert('오류', '이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.');
+            setNicknameChecked(false);
+        } catch (error) {
+            if (error.response && error.response.status === 500) {
                 Alert.alert('성공', '사용 가능한 닉네임입니다.');
                 setNicknameChecked(true);
             } else {
-                Alert.alert('오류', '이미 사용 중인 닉네임입니다.');
+                console.error('닉네임 중복 확인 중 오류 발생:', error);
+                Alert.alert('오류', '닉네임 중복 확인 중 문제가 발생했습니다. 다시 시도해주세요.');
                 setNicknameChecked(false);
             }
-        } catch (error) {
-            console.error('Error checking nickname:', error);
-            Alert.alert('오류', '닉네임 중복 검사에 실패했습니다.');
-            setNicknameChecked(false);
         }
-        */
-    // 임시로 항상 true 반환
-    setNicknameChecked(true);
+    }
   };
 
   const handleSignUp = async () => {
@@ -120,11 +155,11 @@ export default function SignUpFormPage() {
       const response = await axios.post(`${ADS_API_URL}/members`, {
         email,
         password,
-        profileImage,
+        profileImage: profileImageUrl,
         nickname,
-        gender,
-        name,
-        age: parseInt(age),
+        gender: fixedGender,
+        name: fixedName, 
+        age: fixedAge,
         alcoholType1: alcoholTypes[0],
         alcoholType2: alcoholTypes[1],
         alcoholType3: alcoholTypes[2],
@@ -142,11 +177,18 @@ export default function SignUpFormPage() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <TouchableOpacity onPress={handleImagePick} style={styles.imageContainer}>
-        <Image
-          source={profileImage ? {uri: profileImage} : defaultProfileImage}
-          style={styles.profileImage}
-        />
+      <View style={{ position: 'relative', alignItems: 'center' }}>
+        <View style={styles.profileImageContainer}>
+          <Image source={{ uri: profileImage }} style={styles.profileImage} />
+        </View>
+        {profileImage !== 'https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png' ? (
+          <TouchableOpacity style={styles.deleteButton} onPress={removeProfileImage}>
+            <AntDesign name="closecircle" size={24} color="red" />
+          </TouchableOpacity>
+        ) : null}
+      </View>
+
+      <TouchableOpacity style={styles.changePhotoButton} onPress={handleImagePick}>
         <Text style={styles.changePhotoText}>프로필 사진 선택</Text>
       </TouchableOpacity>
 
@@ -164,12 +206,6 @@ export default function SignUpFormPage() {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <TextInput
-        style={styles.input}
-        placeholder="이름"
-        value={name}
-        onChangeText={setName}
-      />
       <View style={styles.nicknameContainer}>
         <TextInput
           style={styles.nicknameInput}
@@ -186,16 +222,24 @@ export default function SignUpFormPage() {
       </View>
       <TextInput
         style={styles.input}
-        placeholder="성별 (M 또는 F)"
-        value={gender}
-        onChangeText={setGender}
+        value={fixedName}
+        editable={false}
+        color='#3A3A3A'
+        backgroundColor='#E6E6E6'
+      />
+      <TextInput
+      style={styles.input}
+      value={fixedGender === 'M' ? '남자' : '여자'}
+      editable={false}
+      color='#3A3A3A'
+      backgroundColor='#E6E6E6'
       />
       <TextInput
         style={styles.input}
-        placeholder="나이"
-        value={age}
-        onChangeText={setAge}
-        keyboardType="numeric"
+        value={String(fixedAge)} 
+        editable={false}
+        color='#3A3A3A'
+        backgroundColor='#E6E6E6'
       />
       {alcoholTypes.map((type, index) => (
         <TextInput
@@ -222,25 +266,36 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8f8',
     padding: 20,
   },
-  pageText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    color: '#333',
-  },
-  imageContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  profileImage: {
+  profileImageContainer: {
     width: 150,
     height: 150,
     borderRadius: 75,
-    marginBottom: 10,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#fff',
+    position: 'relative',
+  },
+  profileImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  changePhotoButton: {
+    alignItems: 'center',
+    marginBottom: 20,
   },
   changePhotoText: {
     color: '#4CAF50',
     fontSize: 16,
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 5,
+    right: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.7)',
+    borderRadius: 12,
+    zIndex: 1,
   },
   input: {
     width: '100%',
