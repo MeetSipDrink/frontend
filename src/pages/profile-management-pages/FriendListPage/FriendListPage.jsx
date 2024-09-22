@@ -3,6 +3,8 @@ import { StyleSheet, TouchableOpacity, View, Text, FlatList, Alert, TextInput, I
 import axios from 'axios';
 import FriendRequestModal from '../FriendRequestPage/FriendRequestPage';
 import UserProfileModal from '../UserProfileModal/UserProfileModal';
+import Keychain from "react-native-keychain";
+import {useFocusEffect} from "@react-navigation/native";
 
 const ADS_API_URL = 'http://10.0.2.2:8080';
 
@@ -15,34 +17,53 @@ export default function FriendListPage({ navigation }) {
     const [requestModalVisible, setRequestModalVisible] = useState(false);
     const [profileModalVisible, setProfileModalVisible] = useState(false);
 
+
     useEffect(() => {
         loadFriends();
     }, []);
 
+    useFocusEffect(
+        React.useCallback(() => {
+            loadFriends();
+        }, [])
+    );
+
     const loadFriends = async () => {
         setLoading(true);
         try {
-            const memberId = 1; // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
+            const credentials = await Keychain.getGenericPassword();
+            if (!credentials) {
+                throw new Error('No credentials stored');
+            }
+            const { accessToken } = JSON.parse(credentials.password);
+
             const [acceptedResponse, pendingResponse] = await Promise.all([
-                axios.get(`${ADS_API_URL}/friends/${memberId}/accepted`),
-                axios.get(`${ADS_API_URL}/friends/${memberId}/pending`)
+                axios.get(`${ADS_API_URL}/friends/get/accepted`, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                }),
+                axios.get(`${ADS_API_URL}/friends/get/pending`, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                }),
             ]);
+
             setAcceptedFriends(acceptedResponse.data.data);
             setPendingFriendsCount(pendingResponse.data.data.length);
         } catch (error) {
-            console.error('Error fetching friends:', error);
-            Alert.alert('오류', '친구 목록을 불러오는데 실패했습니다.');
+            console.error('Error fetching friends:', error.response || error);
+            Alert.alert('오류', '친구 목록을 불러오는데 실패했습니다: ' + (error.response?.data?.message || error.message));
         } finally {
             setLoading(false);
         }
     };
 
-    const addFriend = async () => {
+    const addFriend = async (credentials) => {
+        const { accessToken } = JSON.parse(credentials.password);
         try {
-            const requesterId = 1; // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
             await axios.post(`${ADS_API_URL}/friends`, {
-                requesterId: requesterId,
                 recipientId: parseInt(newFriendId)
+            }, {headers: {
+                    Authorization: `Bearer ${accessToken}`,
+                }
             });
             Alert.alert('성공', '친구 요청을 보냈습니다.');
             setNewFriendId('');
@@ -53,14 +74,15 @@ export default function FriendListPage({ navigation }) {
         }
     };
 
-    const removeFriend = async (friendId) => {
+    const removeFriend = async (friendId, credentials) => {
         try {
-            const memberId = 1; // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
+            const { accessToken } = JSON.parse(credentials.password);
+
             await axios.delete(`${ADS_API_URL}/friends/remove`, {
                 data: {
-                    requesterId: memberId,
                     recipientId: friendId
-                }
+                },
+                headers: { Authorization: `Bearer ${accessToken}` },
             });
             Alert.alert('성공', '친구가 삭제되었습니다.');
             loadFriends();
