@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, FlatList, Modal, Alert, Image, ActivityIndicator } from "react-native";
 import axios from 'axios';
+import Keychain from "react-native-keychain";
 
 const ADS_API_URL = 'http://10.0.2.2:8080';
-const MEMBER_ID = 1; // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
 
 export default function FriendRequestModal({ visible, onClose, onRequestsUpdated }) {
     const [friendRequests, setFriendRequests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [memberId, setMemberId] = useState(null);
 
     useEffect(() => {
         if (visible) {
@@ -18,7 +19,16 @@ export default function FriendRequestModal({ visible, onClose, onRequestsUpdated
     const fetchFriendRequests = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${ADS_API_URL}/friends/${MEMBER_ID}/pending`);
+            const credentials = await Keychain.getGenericPassword();
+            if (!credentials) {
+                throw new Error('No credentials stored');
+            }
+            const { accessToken } = JSON.parse(credentials.password);
+            setMemberId(memberId);
+
+            const response = await axios.get(`${ADS_API_URL}/friends/get/pending`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
             setFriendRequests(response.data.data);
         } catch (error) {
             console.error('Error fetching friend requests:', error);
@@ -29,17 +39,22 @@ export default function FriendRequestModal({ visible, onClose, onRequestsUpdated
     };
 
     const handleAction = async (action, friendId) => {
+        if (!memberId) {
+            Alert.alert('오류', '사용자 정보를 불러오는데 실패했습니다.');
+            return;
+        }
+
         try {
             if (action === 'accept') {
                 await axios.post(`${ADS_API_URL}/friends/accept`, {
-                    requesterId: MEMBER_ID,
+                    requesterId: memberId,
                     recipientId: friendId
                 });
                 Alert.alert('성공', '친구 요청을 수락했습니다.');
             } else if (action === 'reject') {
                 await axios.delete(`${ADS_API_URL}/friends`, {
                     data: {
-                        requesterId: MEMBER_ID,
+                        requesterId: memberId,
                         recipientId: friendId
                     }
                 });
