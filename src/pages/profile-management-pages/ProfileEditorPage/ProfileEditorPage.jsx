@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, TextInput, ScrollView, Alert, Image } from "react-native";
 import axios from 'axios';
+import { launchImageLibrary } from 'react-native-image-picker';
 import * as Keychain from "react-native-keychain";
 
-const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
+const ADS_API_URL = 'http://10.0.2.2:8080';
 
 export default function ProfileEditorPage({ route, navigation }) {
     const [userInfo, setUserInfo] = useState(route.params?.userInfo || {});
@@ -38,7 +39,7 @@ export default function ProfileEditorPage({ route, navigation }) {
                 setLoading(true);
                 const updatedFields = {
                     nickname: userInfo.nickname,
-                    profileImage: profileImage,
+                    profileImage: profileImage, // S3에서 업로드한 이미지 URL
                     alcoholType1: alcoholTypes[0] || '',
                     alcoholType2: alcoholTypes[1] || '',
                     alcoholType3: alcoholTypes[2] || '',
@@ -136,17 +137,82 @@ export default function ProfileEditorPage({ route, navigation }) {
     };
 
     const pickImage = () => {
-        // 이미지 선택 로직을 여기에 구현합니다.
-        // 실제 구현은 react-native-image-picker나 expo-image-picker 등의 라이브러리를 사용해야 합니다.
-        Alert.alert('알림', '이미지 선택 기능은 현재 구현되지 않았습니다.');
+        const options = {
+            mediaType: 'photo',
+            maxWidth: 600,
+            maxHeight: 600,
+            quality: 1,
+        };
+
+        launchImageLibrary(options, async (response) => {
+            if (response.didCancel) {
+                Alert.alert('알림', '이미지 선택이 취소되었습니다.');
+            } else if (response.errorMessage) {
+                Alert.alert('에러', '이미지를 선택하는 중 오류가 발생했습니다.');
+            } else {
+                const uri = response.assets[0].uri;
+                
+                const formData = new FormData();
+                formData.append('multipartFile', {
+                    uri: uri,
+                    type: 'image/jpeg',
+                    name: `profile_${new Date().getTime()}.jpg`,
+                });
+
+                try {
+                    const uploadResponse = await fetch('http://10.0.2.2:8080/images', {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    });
+
+                    const contentType = uploadResponse.headers.get('content-type');
+                    let result;
+
+                    if (contentType && contentType.includes('application/json')) {
+                        result = await uploadResponse.json();
+                    } else {
+                        result = await uploadResponse.text();
+                        console.log('Response is not JSON:', result);
+                    }
+
+                    if (uploadResponse.ok) {
+                        const uploadedImageUrl = typeof result === 'string' ? result : result.imageUrl;
+                        Alert.alert('성공', '프로필 이미지가 성공적으로 업로드되었습니다.');
+                        setProfileImage(uploadedImageUrl);
+                    } else {
+                        Alert.alert('실패', '이미지 업로드에 실패했습니다.');
+                        console.error(result);
+                    }
+                } catch (error) {
+                    console.error('이미지 업로드 오류:', error);
+                    Alert.alert('에러', '이미지를 업로드하는 중 오류가 발생했습니다.');
+                }
+            }
+        });
+    };
+
+    const resetToOriginalImage = () => {
+        setProfileImage(userInfo.profileImage); // 기존의 프로필 이미지로 리셋
     };
 
     return (
         <ScrollView contentContainerStyle={styles.container}>
-            <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
-                <Image source={{ uri: profileImage || 'https://via.placeholder.com/150' }} style={styles.profileImage} />
-                <Text style={styles.changePhotoText}>사진 변경</Text>
-            </TouchableOpacity>
+            <View style={styles.imageWrapper}>
+                <TouchableOpacity onPress={pickImage} style={styles.imageContainer}>
+                    <Image source={{ uri: profileImage }} style={styles.profileImage} />
+                    <Text style={styles.changePhotoText}>사진 변경</Text>
+                </TouchableOpacity>
+
+                {/* 기본 이미지가 아닐 경우에만 X 버튼을 보여줌 */}
+                {profileImage !== userInfo.profileImage && (
+                    <TouchableOpacity style={styles.resetButton} onPress={resetToOriginalImage}>
+                        <Text style={styles.resetButtonText}>X</Text>
+                    </TouchableOpacity>
+                )}
+            </View>
 
             <View style={styles.nicknameContainer}>
                 <TextInput
@@ -205,14 +271,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#f8f8f8',
         padding: 20,
     },
-    pageText: {
-        fontSize: 24,
-        fontWeight: 'bold',
+    imageWrapper: {
+        position: 'relative',
         marginBottom: 20,
     },
     imageContainer: {
         alignItems: 'center',
-        marginBottom: 20,
     },
     profileImage: {
         width: 150,
@@ -222,6 +286,21 @@ const styles = StyleSheet.create({
     },
     changePhotoText: {
         color: '#4CAF50',
+        fontSize: 16,
+    },
+    resetButton: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        backgroundColor: 'red',
+        width: 22,
+        height: 22,
+        borderRadius: 11,
+        alignItems: 'center',
+    },
+    resetButtonText: {
+        color: 'white',
+        fontWeight: 'bold',
         fontSize: 16,
     },
     nicknameContainer: {
