@@ -10,7 +10,7 @@ const useRefreshPosts = (size, sortBy, setPosts, setPage, setHasMore, setSearchK
         if (refreshing) return;
         setRefreshing(true);
         try {
-            const url = `${API_URL}/posts/search/?page=0&size=${size}&keyword=&sort=${sortBy}&searchOption=title`;
+            const url = `${API_URL}/posts/search/?page=1&size=${size}&keyword=&sort=${sortBy}&searchOption=title`;
             console.log(`Refreshing: ${url}`);
             const response = await axios.get(url);
             const newPosts = response.data.data;

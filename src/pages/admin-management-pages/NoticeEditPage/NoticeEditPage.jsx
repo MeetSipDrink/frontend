@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, TextInput, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import axios from 'axios';
 import { launchImageLibrary } from 'react-native-image-picker';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import BottomNavigation from '../../auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
@@ -10,6 +11,8 @@ export default function NoticeEditPage({ route, navigation }) {
     const [imageUrls, setImageUrls] = useState([]); // 서버에서 받은 이미지 URL 리스트
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
+
+    const API_URL = 'http://10.0.2.2:8080';
 
     // 이미지 선택 및 업로드 함수
     const handleSelectImage = () => {
@@ -38,9 +41,7 @@ export default function NoticeEditPage({ route, navigation }) {
                 });
 
                 try {
-                    const uploadResponse = await fetch('http://10.0.2.2:8080/images', {
-                        method: 'POST',
-                        body: formData,
+                    const uploadResponse = await axios.post(`${API_URL}/images`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         },
@@ -88,12 +89,10 @@ export default function NoticeEditPage({ route, navigation }) {
         };
 
         try {
-            const response = await fetch(`http://10.0.2.2:8080/notices/${noticeId}?memberId=1`, {
-                method: 'PATCH', // PATCH 요청 사용
+            const response = await axios.patch(`${API_URL}/notices/${noticeId}?memberId=1`, noticeData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(noticeData),
             });
 
             if (response.ok) {

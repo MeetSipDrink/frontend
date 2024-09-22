@@ -87,7 +87,7 @@ export default function MyPage({ navigation }) {
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.contentWrapper}>
                     <View style={styles.userInfo}>
-                        <Image source={{ uri: userInfo?.profileImage || 'https://via.placeholder.com/150' }} style={styles.mainImage} />
+                        <Image source={{ uri: userInfo.profileImage }} style={styles.mainImage} />
                         <Text style={styles.userInfoText}>{userInfo?.nickname || '닉네임 없음'}</Text>
                         <Text style={styles.userInfoEmail}>{userInfo?.email || '이메일 없음'}</Text>
                     </View>

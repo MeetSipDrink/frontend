@@ -20,7 +20,7 @@ const API_URL = 'http://10.0.2.2:8080';
 
 const BoardListPage = ({ navigation }) => {
     const [posts, setPosts] = useState([]);
-    const [page, setPage] = useState(0);
+    const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(false);
     const [sortBy, setSortBy] = useState('createdAt_desc');
     const [size] = useState(10);
@@ -57,26 +57,10 @@ const BoardListPage = ({ navigation }) => {
         setError(null);
 
         try {
-            const url = `${API_URL}/posts/search/?page=${pageToFetch}&size=${size}&keyword=${keyword}&sort=${sortBy}&searchOption=${option}`;
+            const url = `${API_URL}/posts/search/?page=${pageToFetch}&size=${size}&keyword=${keyword}&sort=${sortBy}&searchOption=${searchOption}`;
             console.log(`Fetching: ${url}`);
             const response = await axios.get(url);
             let newPosts = response.data.data;
-
-            // 클라이언트 측 추가 필터링
-            if (option === 'title') {
-                newPosts = newPosts.filter(post =>
-                    post.title.toLowerCase().includes(keyword.toLowerCase())
-                );
-            } else if (option === 'content') {
-                newPosts = newPosts.filter(post =>
-                    post.content.toLowerCase().includes(keyword.toLowerCase())
-                );
-            } else if (option === 'title_content') {
-                newPosts = newPosts.filter(post =>
-                    post.title.toLowerCase().includes(keyword.toLowerCase()) ||
-                    post.content.toLowerCase().includes(keyword.toLowerCase())
-                );
-            }
 
             if (reset) {
                 setPosts(newPosts);
@@ -99,8 +83,8 @@ const BoardListPage = ({ navigation }) => {
         useCallback(() => {
             if (!isSearchMode) {
                 setHasMore(true);
-                setPage(0);
-                fetchPosts(0, true);
+                setPage(1);
+                fetchPosts(1, true);
             }
         }, [fetchPosts, isSearchMode])
     );
@@ -108,16 +92,16 @@ const BoardListPage = ({ navigation }) => {
     useEffect(() => {
         if (!isSearchMode) {
             setHasMore(true);
-            setPage(0);
-            fetchPosts(0, true);
+            setPage(1);
+            fetchPosts(1, true);
         }
     }, [sortBy, fetchPosts, isSearchMode]);
 
     const handleSearch = useCallback(() => {
         setIsSearchMode(true);
         setHasMore(true);
-        setPage(0);
-        fetchPosts(0, true, searchKeyword, searchOption);
+        setPage(1);
+        fetchPosts(1, true, searchKeyword, searchOption);
     }, [fetchPosts, searchKeyword, searchOption]);
 
     const handleLoadMore = useCallback(() => {
@@ -196,7 +180,7 @@ const BoardListPage = ({ navigation }) => {
         setIsSearchMode(false);
         setSearchKeyword('');
         setHasMore(true);
-        setPage(0);
+        setPage(1);
         refreshPosts();
     }, [refreshPosts]);
 
@@ -204,7 +188,7 @@ const BoardListPage = ({ navigation }) => {
         return (
             <View style={styles.errorContainer}>
                 <Text style={styles.errorText}>{error}</Text>
-                <TouchableOpacity style={styles.retryButton} onPress={() => fetchPosts(0, true)}>
+                <TouchableOpacity style={styles.retryButton} onPress={() => fetchPosts(1, true)}>
                     <Text style={styles.retryButtonText}>다시 시도</Text>
                 </TouchableOpacity>
             </View>
