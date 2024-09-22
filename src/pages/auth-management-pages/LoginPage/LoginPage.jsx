@@ -11,6 +11,7 @@ import {
 import axios from 'axios';
 import messaging from '@react-native-firebase/messaging';
 import * as Keychain from 'react-native-keychain';
+import { useAuth } from '../../../AuthContext';
 
 const ADS_API_URL = 'http://10.0.2.2:8080';
 
@@ -67,6 +68,7 @@ const FloatingLabelInput = ({label, value, onChangeText, secureTextEntry}) => {
 export default function LoginPage({navigation}) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const { login } = useAuth();
 
   const saveToKeychain = async (accessToken, refreshToken) => {
     try {
@@ -92,32 +94,22 @@ export default function LoginPage({navigation}) {
       const response = await axios.post(`${ADS_API_URL}/members/login`, {
         username,
         password,
-        fcmtoken: token,
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
       });
-
-      console.log('Server response status:', response.status);
-      console.log('Server response headers:', response.headers);
 
       if (response.status === 200) {
         const accessToken = response.headers['authorization'];
         const refreshToken = response.headers['refresh'];
 
         if (accessToken && refreshToken) {
-          // Remove 'Bearer ' prefix from accessToken if present
           const cleanAccessToken = accessToken.startsWith('Bearer ') ? accessToken.slice(7) : accessToken;
 
           await saveToKeychain(cleanAccessToken, refreshToken);
+          await login(cleanAccessToken, refreshToken);  // Call AuthContext login function
           navigation.navigate('Home');
         } else {
-          console.error('Missing tokens in response headers');
           throw new Error('인증 토큰이 제공되지 않았습니다.');
         }
       } else {
-        console.error('Unexpected response status:', response.status);
         throw new Error('로그인 응답이 올바르지 않습니다.');
       }
     } catch (error) {

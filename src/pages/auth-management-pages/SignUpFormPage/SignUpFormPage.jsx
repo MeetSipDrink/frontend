@@ -10,7 +10,7 @@ const SignUpTermsPage = () => {
 
     const handleSubmit = () => {
         if (agreeTerms && agreePrivacy) {
-            navigation.navigate('SignUpAdultAuth');
+            navigation.navigate('SignUpAgreement');
         } else {
             Alert.alert("알림", "모든 약관에 동의해주세요.");
         }

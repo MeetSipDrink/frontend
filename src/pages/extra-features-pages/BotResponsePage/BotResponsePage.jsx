@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View, ActivityIndicator, SafeAreaView, KeyboardAvoidingView, Platform, Modal } from "react-native";
 import { Input, Icon } from "react-native-elements";
 import axios from "axios";
+import * as Keychain from 'react-native-keychain';
 
 export default function BotResponsePage({ navigation }) {
     const [inputText, setInputText] = useState("");
     const [responseData, setResponseData] = useState(null);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     const API_KEY = process.env.REACT_APP_API_KEY;
     const HOST_IP = '10.0.2.2';
@@ -19,10 +21,34 @@ export default function BotResponsePage({ navigation }) {
             setInputText("");
         });
 
+        checkLoginStatus();
+
         return unsubscribe;
     }, [navigation]);
 
+    const checkLoginStatus = async () => {
+        try {
+            const credentials = await Keychain.getGenericPassword();
+            setIsLoggedIn(!!credentials);
+        } catch (error) {
+            console.error('Error checking login status:', error);
+            setIsLoggedIn(false);
+        }
+    };
+
     const handlePress1 = async () => {
+        if (!isLoggedIn) {
+            Alert.alert(
+                "로그인 필요",
+                "이 기능을 사용하려면 로그인이 필요합니다.",
+                [
+                    { text: "취소", style: "cancel" },
+                    { text: "로그인", onPress: () => navigation.navigate('Login') }
+                ]
+            );
+            return;
+        }
+
         if (inputText.length === 0) {
             Alert.alert("입력 오류", "텍스트를 입력해주세요.");
             return;

@@ -1,31 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, Alert } from "react-native";
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Keychain from 'react-native-keychain';
+import { useAuth } from '../../../AuthContext'; // AuthContext import
 
 const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
 
-export default function MyPage({ navigation, route }) {
+export default function MyPage({ navigation }) {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const { isLoggedIn, logout } = useAuth(); // useAuth 훅 사용
 
-    // 로그인 상태 확인
-    const checkLoginStatus = useCallback(async () => {
-        try {
-            const credentials = await Keychain.getGenericPassword();
-            if (credentials) {
-                setIsLoggedIn(true);
-            } else {
-                setIsLoggedIn(false);
-            }
-        } catch (error) {
-            console.error('Error checking login status:', error);
-        }
-    }, []);
-
-    // 로그아웃 함수
     const handleLogout = useCallback(async () => {
         try {
             const credentials = await Keychain.getGenericPassword();
@@ -37,32 +23,30 @@ export default function MyPage({ navigation, route }) {
                     },
                 });
                 await Keychain.resetGenericPassword();
-                setIsLoggedIn(false);
-                navigation.navigate('Home'); // 로그인 화면으로 이동
+                logout(); // AuthContext의 logout 함수 호출
+                navigation.navigate('Home'); // 로그아웃 후 홈 페이지로 이동
             }
         } catch (error) {
             console.error('Logout error:', error);
-            const credentials = await Keychain.getGenericPassword();
-            const { accessToken, refreshToken } = JSON.parse(credentials.password);
-            console.log('Username:', accessToken);
-            console.log('Password:', refreshToken);
             Alert.alert('로그아웃 실패', '로그아웃 중 오류가 발생했습니다.');
         }
-    }, [navigation]);
-
+    }, [navigation, logout]);
 
     const fetchUserInfo = useCallback(async () => {
+        if (!isLoggedIn) {
+            setLoading(false);
+            return;
+        }
+        setLoading(true);
         try {
-            console.log('Fetching user info...');
             const credentials = await Keychain.getGenericPassword();
             if (credentials) {
                 const { accessToken } = JSON.parse(credentials.password);
                 const response = await axios.get(`${ADS_API_URL}/members`, {
                     headers: {
-                        Authorization: `Bearer ${ accessToken}`,
+                        Authorization: `Bearer ${accessToken}`,
                     },
                 });
-                console.log('Response:', response.data);
                 setUserInfo(response.data.data);
             }
         } catch (error) {
@@ -71,21 +55,12 @@ export default function MyPage({ navigation, route }) {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [isLoggedIn]);
 
-    // 첫 렌더링 시에 로그인 상태 확인 및 사용자 정보를 가져옴
-    useEffect(() => {
-        checkLoginStatus();
-        fetchUserInfo();
-    }, [checkLoginStatus, fetchUserInfo]);
-
-    // 프로필 수정 후 돌아왔을 때만 정보를 다시 가져옴
     useFocusEffect(
         useCallback(() => {
-            if (route.params?.profileUpdated) {
-                fetchUserInfo();
-            }
-        }, [fetchUserInfo, route.params?.profileUpdated])
+            fetchUserInfo();
+        }, [fetchUserInfo])
     );
 
     if (loading) {
@@ -96,18 +71,27 @@ export default function MyPage({ navigation, route }) {
         );
     }
 
+    if (!isLoggedIn) {
+        return (
+            <View style={styles.container}>
+                <Text style={styles.userInfoText}>로그인이 필요합니다.</Text>
+                <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('Login')}>
+                    <Text style={styles.buttonText}>로그인</Text>
+                </TouchableOpacity>
+            </View>
+        );
+    }
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContent}>
                 <View style={styles.contentWrapper}>
-                    {/* 사용자 프로필 영역 */}
                     <View style={styles.userInfo}>
                         <Image source={{ uri: userInfo?.profileImage || 'https://via.placeholder.com/150' }} style={styles.mainImage} />
                         <Text style={styles.userInfoText}>{userInfo?.nickname || '닉네임 없음'}</Text>
                         <Text style={styles.userInfoEmail}>{userInfo?.email || '이메일 없음'}</Text>
                     </View>
 
-                    {/* 페이지 이동 버튼들 */}
                     <View style={styles.buttonContainer}>
                         <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('FriendList')}>
                             <Text style={styles.buttonText}>친구목록</Text>
@@ -118,15 +102,12 @@ export default function MyPage({ navigation, route }) {
                         >
                             <Text style={styles.buttonText}>정보수정</Text>
                         </TouchableOpacity>
-                        {isLoggedIn && (
-                            <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-                                <Text style={styles.buttonText}>로그아웃</Text>
-                            </TouchableOpacity>
-                        )}
+                        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+                            <Text style={styles.buttonText}>로그아웃</Text>
+                        </TouchableOpacity>
                     </View>
                 </View>
 
-                {/* 사용자 정보 영역 */}
                 <View style={styles.infoContainer}>
                     <InfoItem label="이름" value={userInfo?.name || '이름 없음'} />
                     <InfoItem label="성별" value={userInfo?.gender || '성별 정보 없음'} />
@@ -141,7 +122,6 @@ export default function MyPage({ navigation, route }) {
                 </View>
             </ScrollView>
 
-            {/* 차단목록, 탈퇴 버튼 */}
             <View style={styles.bottomButtonContainer}>
                 <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('BlockList')}>
                     <Text style={styles.secondaryButtonText}>차단목록</Text>
