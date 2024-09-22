@@ -1,99 +1,153 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, View, Text, FlatList, Alert, Image } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, FlatList, Modal, Alert, Image, ActivityIndicator } from "react-native";
 import axios from 'axios';
-import UserProfileModal from '../UserProfileModal/UserProfileModal';
-import * as Keychain from 'react-native-keychain';
+import Keychain from "react-native-keychain";
 
 const ADS_API_URL = 'http://10.0.2.2:8080';
 
-export default function BlockListPage({ navigation }) {
-    const [blockedUsers, setBlockedUsers] = useState([]);
+export default function FriendRequestModal({ visible, onClose, onRequestsUpdated = () => {} }) {
+    const [friendRequests, setFriendRequests] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [profileModalVisible, setProfileModalVisible] = useState(false);
 
     useEffect(() => {
-        loadBlockedUsers();
-    }, []);
-
-    const getAccessToken = async () => {
-        try {
-            const credentials = await Keychain.getGenericPassword();
-            if (credentials) {
-                return JSON.parse(credentials.password).accessToken;
-            }
-            throw new Error('No credentials stored');
-        } catch (error) {
-            console.error('Error getting access token:', error);
-            throw error;
+        if (visible) {
+            fetchFriendRequests();
         }
-    };
+    }, [visible]);
 
-    const loadBlockedUsers = async () => {
+    const fetchFriendRequests = async () => {
         setLoading(true);
         try {
-            const accessToken = await getAccessToken();
-            const response = await axios.get(`${ADS_API_URL}/ban`, {
-                headers: { Authorization: `Bearer ${accessToken}` }
+            const credentials = await Keychain.getGenericPassword();
+            if (!credentials) {
+                throw new Error('No credentials stored');
+            }
+            const { accessToken } = JSON.parse(credentials.password);
+
+            const response = await axios.get(`${ADS_API_URL}/friends/get/pending`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
             });
-            setBlockedUsers(response.data);
+            setFriendRequests(response.data.data);
         } catch (error) {
-            console.error('Error fetching blocked users:', error);
-            Alert.alert('오류', '차단 목록을 불러오는데 실패했습니다.');
+            console.error('Error fetching friend requests:', error);
+            if (error.response) {
+                console.error('Error data:', error.response.data);
+                Alert.alert('오류', error.response.data.message || '친구 요청 목록을 불러오는데 실패했습니다.');
+            } else {
+                Alert.alert('오류', '친구 요청 목록을 불러오는데 실패했습니다.');
+            }
         } finally {
             setLoading(false);
         }
     };
 
-    const unblockUser = async (blockedId) => {
+    const handleAction = async (action, friendId) => {
         try {
-            const accessToken = await getAccessToken();
-            await axios.delete(`${ADS_API_URL}/ban/${blockedId}`, {
-                headers: { Authorization: `Bearer ${accessToken}` }
-            });
-            Alert.alert('성공', '차단이 해제되었습니다.');
-            loadBlockedUsers();
+            const credentials = await Keychain.getGenericPassword();
+            if (!credentials) {
+                throw new Error('No credentials stored');
+            }
+            const { accessToken } = JSON.parse(credentials.password);
+
+            if (action === 'accept') {
+                await axios.post(`${ADS_API_URL}/friends/accept`, {
+                    recipientId: friendId
+                }, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+                // Alert.alert('성공', '친구 요청을 수락했습니다.');
+            } else if (action === 'reject') {
+                await axios.delete(`${ADS_API_URL}/friends`, {
+                    data: {
+                        recipientId: friendId
+                    },
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+                Alert.alert('성공', '친구 요청을 거절했습니다.');
+            }
+
+            // onRequestsUpdated가 함수인지 확인한 후 호출
+            if (typeof onRequestsUpdated === 'function') {
+                try {
+                    onRequestsUpdated();
+                } catch (updateError) {
+                    console.error('Error in onRequestsUpdated:', updateError);
+                    Alert.alert('오류', '요청 업데이트에 실패했습니다.');
+                }
+            }
+
+            // 친구 요청 목록 갱신
+            try {
+                await fetchFriendRequests();
+            } catch (fetchError) {
+                console.error('Error fetching friend requests after action:', fetchError);
+                Alert.alert('오류', '친구 요청을 업데이트하는데 실패했습니다.');
+            }
         } catch (error) {
-            console.error('Error unblocking user:', error);
-            Alert.alert('오류', '차단 해제에 실패했습니다.');
+            console.error('Error handling friend request:', error);
+            if (error.response) {
+                console.error('Error data:', error.response.data);
+                Alert.alert('오류', error.response.data.message || '요청 처리에 실패했습니다.');
+            } else {
+                Alert.alert('오류', '요청 처리에 실패했습니다.');
+            }
         }
     };
 
-    const renderBlockedUserItem = ({ item }) => (
-        <View style={styles.userItem}>
-            <TouchableOpacity
-                onPress={() => {
-                    setSelectedUser(item);
-                    setProfileModalVisible(true);
-                }}
-            >
-                <Image
-                    source={{ uri: item.profileImage || 'https://via.placeholder.com/50' }}
-                    style={styles.profileImage}
-                />
-            </TouchableOpacity>
-            <View style={styles.userInfo}>
-                <Text style={styles.userName}>{item.bannedNickname}</Text>
+    const renderFriendRequestItem = ({ item }) => (
+        <View style={styles.requestItem}>
+            <Image
+                source={{ uri: item.friendProfileImage || 'https://via.placeholder.com/50' }}
+                style={styles.profileImage}
+            />
+            <View style={styles.friendInfo}>
+                <Text style={styles.friendName}>{item.friendNickName}</Text>
+            </View>
+            <View style={styles.actionButtons}>
+                <TouchableOpacity
+                    style={[styles.actionButton, styles.acceptButton]}
+                    onPress={() => handleAction('accept', item.friendId)}
+                >
+                    <Text style={styles.actionButtonText}>수락</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.actionButton, styles.rejectButton]}
+                    onPress={() => handleAction('reject', item.friendId)}
+                >
+                    <Text style={styles.actionButtonText}>거절</Text>
+                </TouchableOpacity>
             </View>
         </View>
     );
 
     return (
-        <View style={styles.container}>
-            <UserProfileModal
-                visible={profileModalVisible}
-                onClose={() => setProfileModalVisible(false)}
-                user={selectedUser}
-                relationship="blocked"
-                onUnblock={() => {
-                    if (selectedUser) {
-                        unblockUser(selectedUser.banMemberId);
-                        setProfileModalVisible(false);
-                    }
-                }}
-                onProfileUpdate={loadBlockedUsers}
-            />
-        </View>
+        <Modal
+            animationType="slide"
+            transparent={true}
+            visible={visible}
+            onRequestClose={onClose}
+        >
+            <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                    <Text style={styles.modalTitle}>친구 요청</Text>
+                    {loading ? (
+                        <ActivityIndicator size="large" color="#0000ff" />
+                    ) : friendRequests.length === 0 ? (
+                        <Text style={styles.noRequestsText}>대기 중인 친구 요청이 없습니다.</Text>
+                    ) : (
+                        <FlatList
+                            data={friendRequests}
+                            renderItem={renderFriendRequestItem}
+                            keyExtractor={(item) => item.friendId.toString()}
+                            style={styles.list}
+                        />
+                    )}
+                    <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+                        <Text style={styles.closeButtonText}>닫기</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Modal>
     );
 }
 
