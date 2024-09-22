@@ -77,38 +77,37 @@ export default function SignUpFormPage() {
   };
 
   const checkNickname = async () => {
-    // 닉네임 중복 검사 로직 (주석 처리)
-    /*
-        if (!nickname) {
-            Alert.alert('오류', '닉네임을 입력해주세요.');
-            return;
-        }
+    if (!nickname) {
+        Alert.alert('오류', '닉네임을 입력해주세요.');
+        return;
+    }
 
-        const nicknameRegex = /^[a-zA-Z0-9가-힣]{2,8}$/;
-        if (!nicknameRegex.test(nickname)) {
-            Alert.alert('오류', '특수문자 제외 2자 이상 8자 이하로 입력해주세요.');
-            return;
-        }
-
+    const nicknameRegex = /^[a-zA-Z0-9가-힣]{2,8}$/;
+    if (!nicknameRegex.test(nickname)) {
+        Alert.alert('오류', '특수문자 제외 2자 이상 8자 이하로 입력해주세요.');
+        return;
+    }
+    else {
         try {
-            const response = await axios.get(`${ADS_API_URL}/search/${nickname}`);
-            const isAvailable = response.data;
-            if (isAvailable) {
+            const response = await axios.get(`${ADS_API_URL}/members/${nickname}`);
+            // axios는 200번대 상태 코드를 성공으로 처리합니다.
+            // 여기서는 200 OK가 중복된 닉네임을 의미합니다.
+            Alert.alert('오류', '이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.');
+            setNicknameChecked(false);
+        } catch (error) {
+            if (error.response && error.response.status === 500) {
+                // 500 에러는 중복되지 않은 닉네임을 의미합니다.
                 Alert.alert('성공', '사용 가능한 닉네임입니다.');
                 setNicknameChecked(true);
             } else {
-                Alert.alert('오류', '이미 사용 중인 닉네임입니다.');
+                // 기타 다른 에러에 대한 처리
+                console.error('닉네임 중복 확인 중 오류 발생:', error);
+                Alert.alert('오류', '닉네임 중복 확인 중 문제가 발생했습니다. 다시 시도해주세요.');
                 setNicknameChecked(false);
             }
-        } catch (error) {
-            console.error('Error checking nickname:', error);
-            Alert.alert('오류', '닉네임 중복 검사에 실패했습니다.');
-            setNicknameChecked(false);
         }
-        */
-    // 임시로 항상 true 반환
-    setNicknameChecked(true);
-  };
+    }
+};
 
   const handleSignUp = async () => {
     if (!validateInputs()) return;

@@ -2,16 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import React, {useState, useEffect} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {PermissionsAndroid, Platform} from 'react-native';
 import { AuthProvider } from './AuthContext';
 
 import messaging from '@react-native-firebase/messaging';
 import notifee, { AndroidImportance, EventType } from '@notifee/react-native';
+
+import { LogBox } from 'react-native';
 
 // 커스텀 BottomNavigation 컴포넌트 불러오기
 import BottomNavigation from './pages/auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
@@ -20,6 +18,7 @@ import BottomNavigation from './pages/auth-management-pages/HomePage/bottomNavig
 import HomePage from './pages/auth-management-pages/HomePage/HomePage';
 import LoginPage from './pages/auth-management-pages/LoginPage/LoginPage';
 import SignUpFormPage from './pages/auth-management-pages/SignUpFormPage/SignUpFormPage';
+import AdultAuthPage from './pages/auth-management-pages/AdultAuthPage/AdultAuthPage';
 import SignUpAgreementPage from './pages/auth-management-pages/SignUpAgreementPage/SignUpAgreementPage';
 import MyPage from './pages/profile-management-pages/MyPage/MyPage';
 import FriendListPage from './pages/profile-management-pages/FriendListPage/FriendListPage';
@@ -46,6 +45,8 @@ import CreateChatRoom from './pages/communication-tools-pages/ChatRoomEditPage/C
 
 // LoadingPage 불러오기
 import LoadingPage from './pages/auth-management-pages/LoadingPage/LoadingPage';
+
+LogBox.ignoreLogs(['TextElement: Support for defaultProps']);
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -212,6 +213,11 @@ export default function App() {
           options={{ headerShown: true, headerTitle: '' }}
         />
         <Stack.Screen
+          name="SignUpAdultAuth"
+          component={AdultAuthPage}
+          options={{headerShown: true, headerTitle: '성인인증'}}
+        />
+        <Stack.Screen
           name="SignUpAgreement"
           component={SignUpAgreementPage}
           options={{ headerShown: true, headerTitle: '회원가입' }}
@@ -245,7 +251,6 @@ export default function App() {
           name="BoardPost"
           component={BoardPostPage}
           options={{ headerShown: true, headerTitle: '게시글 작성' }}
-          options={{headerShown: false}}
         />
         <Stack.Screen
           name="BoardEdit"
