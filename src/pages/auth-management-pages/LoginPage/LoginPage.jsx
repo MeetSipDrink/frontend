@@ -9,10 +9,11 @@ import {
   Alert,
 } from 'react-native';
 import axios from 'axios';
+import messaging from '@react-native-firebase/messaging';
 import * as Keychain from 'react-native-keychain';
 import { useAuth } from '../../../AuthContext';
 
-const AD_API_URL = 'http://10.0.2.2:8080';
+const ADS_API_URL = 'http://10.0.2.2:8080';
 
 const FloatingLabelInput = ({label, value, onChangeText, secureTextEntry}) => {
   const [isFocused, setIsFocused] = useState(false);
@@ -88,7 +89,9 @@ export default function LoginPage({navigation}) {
     }
 
     try {
-      const response = await axios.post(`${AD_API_URL}/members/login`, {
+      const token = await messaging().getToken();
+
+      const response = await axios.post(`${ADS_API_URL}/members/login`, {
         username,
         password,
       });
