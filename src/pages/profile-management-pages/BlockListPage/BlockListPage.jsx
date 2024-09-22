@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, View, Text, FlatList, Alert, Image } from "react-native";
+import { StyleSheet, TouchableOpacity, View, Text, FlatList, Alert } from "react-native";
 import axios from 'axios';
-import UserProfileModal from '../UserProfileModal/UserProfileModal';
 import * as Keychain from 'react-native-keychain';
 
 const ADS_API_URL = 'http://10.0.2.2:8080';
@@ -9,8 +8,6 @@ const ADS_API_URL = 'http://10.0.2.2:8080';
 export default function BlockListPage({ navigation }) {
     const [blockedUsers, setBlockedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [profileModalVisible, setProfileModalVisible] = useState(false);
 
     useEffect(() => {
         loadBlockedUsers();
@@ -45,10 +42,10 @@ export default function BlockListPage({ navigation }) {
         }
     };
 
-    const unblockUser = async (blockedId) => {
+    const unblockUser = async (banId) => {
         try {
             const accessToken = await getAccessToken();
-            await axios.delete(`${ADS_API_URL}/ban/${blockedId}`, {
+            await axios.delete(`${ADS_API_URL}/ban/${banId}`, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             Alert.alert('성공', '차단이 해제되었습니다.');
@@ -61,20 +58,13 @@ export default function BlockListPage({ navigation }) {
 
     const renderBlockedUserItem = ({ item }) => (
         <View style={styles.userItem}>
+            <Text style={styles.userName}>{item.bannedNickname}</Text>
             <TouchableOpacity
-                onPress={() => {
-                    setSelectedUser(item);
-                    setProfileModalVisible(true);
-                }}
+                style={styles.unblockButton}
+                onPress={() => unblockUser(item.banId)}
             >
-                <Image
-                    source={{ uri: item.friendProfileImage || 'https://via.placeholder.com/50' }}
-                    style={styles.profileImage}
-                />
+                <Text style={styles.unblockButtonText}>차단 해제</Text>
             </TouchableOpacity>
-            <View style={styles.userInfo}>
-                <Text style={styles.userName}>{item.bannedNickname}</Text>
-            </View>
         </View>
     );
 
@@ -97,19 +87,6 @@ export default function BlockListPage({ navigation }) {
                     )}
                 </>
             )}
-
-            <UserProfileModal
-                visible={profileModalVisible}
-                onClose={() => setProfileModalVisible(false)}
-                user={selectedUser}
-                relationship="blocked"
-                onUnblock={() => {
-                    if (selectedUser) {
-                        unblockUser(selectedUser.bannedMemberId);
-                        setProfileModalVisible(false);
-                    }
-                }}
-            />
         </View>
     );
 }
@@ -131,24 +108,26 @@ const styles = StyleSheet.create({
     },
     userItem: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
         padding: 15,
         backgroundColor: '#fff',
         borderRadius: 5,
         marginBottom: 10,
     },
-    profileImage: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        marginRight: 15,
-    },
-    userInfo: {
-        flex: 1,
-    },
     userName: {
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    unblockButton: {
+        backgroundColor: '#FF9800',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+    },
+    unblockButtonText: {
+        color: '#fff',
+        fontSize: 14,
     },
     noBlockedUsersText: {
         fontSize: 16,
