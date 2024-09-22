@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TouchableOpacity,
   View,
@@ -10,24 +10,24 @@ import {
   Image,
 } from 'react-native';
 import axios from 'axios';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const ADS_API_URL = 'http://10.0.2.2:8080';
 
 export default function SignUpFormPage() {
+  const route = useRoute();
+  const navigation = useNavigation();
+  
+  const { name: fixedName, gender: fixedGender, age: fixedAge } = route.params;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [profileImage, setProfileImage] = useState('https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png');
   const [profileImageUrl, setProfileImageUrl] = useState('https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png');
   const [nickname, setNickname] = useState('');
   const [nicknameChecked, setNicknameChecked] = useState(false);
-  const [gender, setGender] = useState('');
-  const [name, setName] = useState('');
-  const [age, setAge] = useState('');
   const [alcoholTypes, setAlcoholTypes] = useState(['', '', '']);
-  const navigation = useNavigation();
 
   const handleAlcoholTypeChange = (index, value) => {
     const newAlcoholTypes = [...alcoholTypes];
@@ -97,12 +97,12 @@ export default function SignUpFormPage() {
 
   // 프로필 이미지 삭제
   const removeProfileImage = () => {
-    setProfileImage('https://meetsipdrink-bucket.s3.ap-northeast-2.amazonaws.com/default-profile/profileImage.png?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEEoaDmFwLW5vcnRoZWFzdC0yIkYwRAIgY4oPg2VaqzmxBG%2Fd5aNQl0F%2FS6iPP7QHs%2BelY1ZKLYACIBkV2%2BhdPbmJyI0hYJ2Tx6EEV3hbOvHjsg4tH8QO41aIKu0CCIP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMMjExMTI1NjE5OTM5Igw58NfCEk0gBP%2FhIrwqwQIVxcSZ9boz6QbEkkgtMWOaj4bKCK%2Ban8oTXBcwjpIeP1e2eSnIQofHJq0BuboyAfux8E1gVsKhZGva9Q%2FzC5nZ6Gbi4WnJ9IvjsDEDxNQmaB6dahPcXhpsdIB%2BHmqdvinxqNAx9ERFCTGmjJrZQXoXDFqHFOqEqNZ8IQq0LXtJkBuwYuXDwZPsFn9tc6FooIpNYFUQpWvAH13TCMakf2F3WS6Zk2wg4H9i6QDXFEYNdEkDNRmo9i6GeIJzV2RfIpsoOuF%2BcjTFe9B%2Bf6Zs6UtUx%2Bs450jbQ5OuJr%2Bb0eFYKNT%2B%2FvJwaWsmUlhfH3NAlnSZBC1jvcDhUVab6t8Xb%2BU9ab7SaaVCgpp0TFpoEjt1UBQAhP9229Uw3jdZzkp%2B9YqpR2fK5KJ5uDRIwruX%2F69ypAagBbqjHn4Mas2hMKdRtO4wqsa4twY6tAK9bgb54yFlu5imRQr8iBVoHh2JaZJLpV8joyqTvGtXW0eEbnkg1cXOxvYg%2Bns2urPk8YL9kOZ1qRKK08kM%2FPvdNiQTVfthhBXchQ0nuWxnk8cx3rIuhiDvn1fQ08%2BB0SnpjeHHcBTAsz9oUT76XHJwewU4iOh%2BlWhCNWnUx7YrASk1D4RLZBzMWitsL0Vvrne6X260HUE1nE3z8eRFNCeRHngKqUWj5WrEMx8Ygd0AeXh7ttlt%2Fu77g55jAysot5W%2B23aJ2cjoNH%2Fa70D4jnMLfnzXgZ%2BqpHX%2FRTyNix%2FnD1Kt0y1DKJfnt3GQRdU8xGeZhMqPSVyYrrwHvuxPqLFn%2F0OIB7vO7wNiaXHkkd9B9S1iK3nM9g%2Fd12J5d%2FMxer9wJVdirkEm0mibYCkfOJqUPNbcSA%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T013845Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIATCKARJTRSS4UF7BL%2F20240921%2Fap-northeast-2%2Fs3%2Faws4_request&X-Amz-Signature=593e86566347c39c1d7da2da537367c82bf5590ccfbade4a6ed4135bb6993782'); 
-    setProfileImageUrl('https://meetsipdrink-bucket.s3.ap-northeast-2.amazonaws.com/default-profile/profileImage.png?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEEoaDmFwLW5vcnRoZWFzdC0yIkYwRAIgY4oPg2VaqzmxBG%2Fd5aNQl0F%2FS6iPP7QHs%2BelY1ZKLYACIBkV2%2BhdPbmJyI0hYJ2Tx6EEV3hbOvHjsg4tH8QO41aIKu0CCIP%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQABoMMjExMTI1NjE5OTM5Igw58NfCEk0gBP%2FhIrwqwQIVxcSZ9boz6QbEkkgtMWOaj4bKCK%2Ban8oTXBcwjpIeP1e2eSnIQofHJq0BuboyAfux8E1gVsKhZGva9Q%2FzC5nZ6Gbi4WnJ9IvjsDEDxNQmaB6dahPcXhpsdIB%2BHmqdvinxqNAx9ERFCTGmjJrZQXoXDFqHFOqEqNZ8IQq0LXtJkBuwYuXDwZPsFn9tc6FooIpNYFUQpWvAH13TCMakf2F3WS6Zk2wg4H9i6QDXFEYNdEkDNRmo9i6GeIJzV2RfIpsoOuF%2BcjTFe9B%2Bf6Zs6UtUx%2Bs450jbQ5OuJr%2Bb0eFYKNT%2B%2FvJwaWsmUlhfH3NAlnSZBC1jvcDhUVab6t8Xb%2BU9ab7SaaVCgpp0TFpoEjt1UBQAhP9229Uw3jdZzkp%2B9YqpR2fK5KJ5uDRIwruX%2F69ypAagBbqjHn4Mas2hMKdRtO4wqsa4twY6tAK9bgb54yFlu5imRQr8iBVoHh2JaZJLpV8joyqTvGtXW0eEbnkg1cXOxvYg%2Bns2urPk8YL9kOZ1qRKK08kM%2FPvdNiQTVfthhBXchQ0nuWxnk8cx3rIuhiDvn1fQ08%2BB0SnpjeHHcBTAsz9oUT76XHJwewU4iOh%2BlWhCNWnUx7YrASk1D4RLZBzMWitsL0Vvrne6X260HUE1nE3z8eRFNCeRHngKqUWj5WrEMx8Ygd0AeXh7ttlt%2Fu77g55jAysot5W%2B23aJ2cjoNH%2Fa70D4jnMLfnzXgZ%2BqpHX%2FRTyNix%2FnD1Kt0y1DKJfnt3GQRdU8xGeZhMqPSVyYrrwHvuxPqLFn%2F0OIB7vO7wNiaXHkkd9B9S1iK3nM9g%2Fd12J5d%2FMxer9wJVdirkEm0mibYCkfOJqUPNbcSA%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240921T013845Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIATCKARJTRSS4UF7BL%2F20240921%2Fap-northeast-2%2Fs3%2Faws4_request&X-Amz-Signature=593e86566347c39c1d7da2da537367c82bf5590ccfbade4a6ed4135bb6993782');
+    setProfileImage('https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png');
+    setProfileImageUrl('https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png');
   };
 
   const validateInputs = () => {
-    if (!email || !password || !name || !age || !nickname || !alcoholTypes[0]) {
+    if (!email || !password || !nickname || !alcoholTypes[0]) {
       Alert.alert('오류', '필수 필드를 모두 입력해주세요.');
       return false;
     }
@@ -111,10 +111,6 @@ export default function SignUpFormPage() {
         '오류',
         '닉네임은 특수문자 제외 2자이상 8자 이하로 입력해주세요.',
       );
-      return false;
-    }
-    if (!/^[MF]$/.test(gender)) {
-      Alert.alert('오류', "성별을 'M' 또는 'F'로 입력해 주세요.");
       return false;
     }
     return true;
@@ -134,24 +130,20 @@ export default function SignUpFormPage() {
     else {
         try {
             const response = await axios.get(`${ADS_API_URL}/members/${nickname}`);
-            // axios는 200번대 상태 코드를 성공으로 처리합니다.
-            // 여기서는 200 OK가 중복된 닉네임을 의미합니다.
             Alert.alert('오류', '이미 사용 중인 닉네임입니다. 다른 닉네임을 입력해주세요.');
             setNicknameChecked(false);
         } catch (error) {
             if (error.response && error.response.status === 500) {
-                // 500 에러는 중복되지 않은 닉네임을 의미합니다.
                 Alert.alert('성공', '사용 가능한 닉네임입니다.');
                 setNicknameChecked(true);
             } else {
-                // 기타 다른 에러에 대한 처리
                 console.error('닉네임 중복 확인 중 오류 발생:', error);
                 Alert.alert('오류', '닉네임 중복 확인 중 문제가 발생했습니다. 다시 시도해주세요.');
                 setNicknameChecked(false);
             }
         }
     }
-};
+  };
 
   const handleSignUp = async () => {
     if (!validateInputs()) return;
@@ -165,9 +157,9 @@ export default function SignUpFormPage() {
         password,
         profileImage: profileImageUrl,
         nickname,
-        gender,
-        name,
-        age: parseInt(age),
+        gender: fixedGender,
+        name: fixedName, 
+        age: fixedAge,
         alcoholType1: alcoholTypes[0],
         alcoholType2: alcoholTypes[1],
         alcoholType3: alcoholTypes[2],
@@ -187,10 +179,7 @@ export default function SignUpFormPage() {
     <ScrollView contentContainerStyle={styles.container}>
       <View style={{ position: 'relative', alignItems: 'center' }}>
         <View style={styles.profileImageContainer}>
-        <Image
-          source={{ uri: profileImage }}
-          style={styles.profileImage}
-        />
+          <Image source={{ uri: profileImage }} style={styles.profileImage} />
         </View>
         {profileImage !== 'https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png' ? (
           <TouchableOpacity style={styles.deleteButton} onPress={removeProfileImage}>
@@ -217,12 +206,6 @@ export default function SignUpFormPage() {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <TextInput
-        style={styles.input}
-        placeholder="이름"
-        value={name}
-        onChangeText={setName}
-      />
       <View style={styles.nicknameContainer}>
         <TextInput
           style={styles.nicknameInput}
@@ -239,16 +222,24 @@ export default function SignUpFormPage() {
       </View>
       <TextInput
         style={styles.input}
-        placeholder="성별 (M 또는 F)"
-        value={gender}
-        onChangeText={setGender}
+        value={fixedName}
+        editable={false}
+        color='#3A3A3A'
+        backgroundColor='#E6E6E6'
+      />
+      <TextInput
+      style={styles.input}
+      value={fixedGender === 'M' ? '남자' : '여자'}
+      editable={false}
+      color='#3A3A3A'
+      backgroundColor='#E6E6E6'
       />
       <TextInput
         style={styles.input}
-        placeholder="나이"
-        value={age}
-        onChangeText={setAge}
-        keyboardType="numeric"
+        value={String(fixedAge)} 
+        editable={false}
+        color='#3A3A3A'
+        backgroundColor='#E6E6E6'
       />
       {alcoholTypes.map((type, index) => (
         <TextInput
@@ -276,19 +267,19 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   profileImageContainer: {
-    width: 150, 
-    height: 150, 
-    borderRadius: 75, 
-    overflow: 'hidden', 
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    overflow: 'hidden',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff', 
+    backgroundColor: '#fff',
     position: 'relative',
   },
   profileImage: {
-      width: '100%',
-      height: '100%',
-      resizeMode: 'cover', 
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
   changePhotoButton: {
     alignItems: 'center',
@@ -304,8 +295,8 @@ const styles = StyleSheet.create({
     right: 5,
     backgroundColor: 'rgba(255, 255, 255, 0.7)',
     borderRadius: 12,
-    zIndex: 1
-},
+    zIndex: 1,
+  },
   input: {
     width: '100%',
     backgroundColor: '#fff',
