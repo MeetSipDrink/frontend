@@ -233,7 +233,7 @@ export default function SignUpFormPage() {
             setNicknameChecked(false);
           }}
         />
-        <TouchableOpacity style={styles.checkButton} onPress={() => {}}>
+        <TouchableOpacity style={styles.checkButton} onPress={checkNickname}>
           <Text style={styles.checkButtonText}>중복 검사</Text>
         </TouchableOpacity>
       </View>
