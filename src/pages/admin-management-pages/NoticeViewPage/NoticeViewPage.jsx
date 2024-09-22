@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import axios from 'axios';
 import Swiper from 'react-native-swiper';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import BottomNavigation from '../../auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
@@ -10,20 +11,20 @@ export default function NoticeViewPage({ route, navigation }) {
     const [loading, setLoading] = useState(true); // 로딩 상태 저장
     const memberId = 1; // 현재 로그인한 사용자의 ID
 
+    const API_URL = 'http://10.0.2.2:8080';
+
     useEffect(() => {
         // 공지사항 데이터 가져오기 함수
-        const fetchNoticeData = () => {
+        const fetchNoticeData = async () => {
             if (noticeId) {
-                fetch(`http://10.0.2.2:8080/notices/${noticeId}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        setNotice(data.data); // data.data로 접근
-                        setLoading(false);
-                    })
-                    .catch(error => {
-                        console.error('공지사항을 불러오는 중 오류가 발생했습니다:', error);
-                        setLoading(false);
-                    });
+                try {
+                    const response = await axios.get(`${API_URL}/notices/${noticeId}`);
+                    setNotice(response.data.data); // data.data로 접근
+                    setLoading(false);
+                } catch (error) {
+                    console.error('공지사항을 불러오는 중 오류가 발생했습니다:', error);
+                    setLoading(false);
+                }
             } else {
                 console.error('noticeId가 전달되지 않았습니다.');
             }
@@ -44,9 +45,7 @@ export default function NoticeViewPage({ route, navigation }) {
     // 삭제 함수
     const handleDelete = async () => {
         try {
-            const response = await fetch(`http://10.0.2.2:8080/notices/${noticeId}?memberId=${memberId}`, {
-                method: 'DELETE',
-            });
+            const response = await axios.delete(`${API_URL}/notices/${noticeId}?memberId=${memberId}`);
             if (response.ok) {
                 Alert.alert('성공', '공지사항이 삭제되었습니다.');
                 navigation.navigate('NoticeList');

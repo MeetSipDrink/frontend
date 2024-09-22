@@ -160,28 +160,18 @@ export default function ProfileEditorPage({ route, navigation }) {
                 });
 
                 try {
-                    const uploadResponse = await fetch('http://10.0.2.2:8080/images', {
-                        method: 'POST',
-                        body: formData,
+                    const uploadResponse = await axios.post(`${ADS_API_URL}/images`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         },
                     });
-
-                    const contentType = uploadResponse.headers.get('content-type');
-                    let result;
-
-                    if (contentType && contentType.includes('application/json')) {
-                        result = await uploadResponse.json();
-                    } else {
-                        result = await uploadResponse.text();
-                        console.log('Response is not JSON:', result);
-                    }
-
-                    if (uploadResponse.ok) {
+                
+                    const result = uploadResponse.data;
+                
+                    if (uploadResponse.status === 200) {
                         const uploadedImageUrl = typeof result === 'string' ? result : result.imageUrl;
                         Alert.alert('성공', '프로필 이미지가 성공적으로 업로드되었습니다.');
-                        setProfileImage(uploadedImageUrl);
+                        setProfileImage(uploadedImageUrl); // S3 URL 저장
                     } else {
                         Alert.alert('실패', '이미지 업로드에 실패했습니다.');
                         console.error(result);

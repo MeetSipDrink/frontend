@@ -23,8 +23,8 @@ export default function SignUpFormPage() {
   const { name: fixedName, gender: fixedGender, age: fixedAge } = route.params;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [profileImage, setProfileImage] = useState('https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png');
-  const [profileImageUrl, setProfileImageUrl] = useState('https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png');
+  const [profileImage, setProfileImage] = useState('https://meetsipdrink-bucket.s3.ap-northeast-2.amazonaws.com/default-profile/profileImage.png');
+  const [profileImageUrl, setProfileImageUrl] = useState('https://meetsipdrink-bucket.s3.ap-northeast-2.amazonaws.com/default-profile/profileImage.png');
   const [nickname, setNickname] = useState('');
   const [nicknameChecked, setNicknameChecked] = useState(false);
   const [alcoholTypes, setAlcoholTypes] = useState(['', '', '']);
@@ -62,30 +62,20 @@ export default function SignUpFormPage() {
         });
 
         try {
-          const uploadResponse = await fetch(`${ADS_API_URL}/images`, {
-            method: 'POST',
-            body: formData,
+          const uploadResponse = await axios.post(`${ADS_API_URL}/images`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
             },
           });
-
-          const contentType = uploadResponse.headers.get('content-type');
-          let result;
-
-          if (contentType && contentType.includes('application/json')) {
-            result = await uploadResponse.json(); // JSON 형식일 경우 파싱
-          } else {
-            result = await uploadResponse.text();
-          }
-
-          if (uploadResponse.ok) {
-            const uploadedImageUrl = typeof result === 'string' ? result : result.imageUrl;
-            setProfileImageUrl(uploadedImageUrl); // S3 URL 저장
+        
+          const uploadedImageUrl = typeof uploadResponse.data === 'string' ? uploadResponse.data : uploadResponse.data.imageUrl;
+        
+          if (uploadResponse.status === 200) {
+            setProfileImageUrl(uploadedImageUrl);  // S3 URL 저장
             Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
           } else {
             Alert.alert('실패', '이미지 업로드에 실패했습니다.');
-            console.error(result);
+            console.error(uploadResponse.data);
           }
         } catch (error) {
           console.error('이미지 업로드 오류:', error);
@@ -97,8 +87,8 @@ export default function SignUpFormPage() {
 
   // 프로필 이미지 삭제
   const removeProfileImage = () => {
-    setProfileImage('https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png');
-    setProfileImageUrl('https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png');
+    setProfileImage('https://meetsipdrink-bucket.s3.ap-northeast-2.amazonaws.com/default-profile/profileImage.png');
+    setProfileImageUrl('https://meetsipdrink-bucket.s3.ap-northeast-2.amazonaws.com/default-profile/profileImage.png');
   };
 
   const validateInputs = () => {
@@ -181,7 +171,7 @@ export default function SignUpFormPage() {
         <View style={styles.profileImageContainer}>
           <Image source={{ uri: profileImage }} style={styles.profileImage} />
         </View>
-        {profileImage !== 'https://meetsipdrink-bucket.s3://meetsipdrink-bucket/default-profile/profileImage.png' ? (
+        {profileImage !== 'https://meetsipdrink-bucket.s3.ap-northeast-2.amazonaws.com/default-profile/profileImage.png' ? (
           <TouchableOpacity style={styles.deleteButton} onPress={removeProfileImage}>
             <AntDesign name="closecircle" size={24} color="red" />
           </TouchableOpacity>

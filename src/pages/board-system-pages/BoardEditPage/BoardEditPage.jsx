@@ -92,29 +92,18 @@ export default function BoardEditPage() {
         });
 
         try {
-            const response = await fetch(`${API_URL}/images`, {
-                method: 'POST',
-                body: formData,
+            const response = await axios.post(`${API_URL}/images`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
-
-            const contentType = response.headers.get('content-type');
-            let result;
-
-            if (contentType && contentType.includes('application/json')) {
-                result = await response.json(); // JSON 형식일 경우 파싱
-            } else {
-                result = await response.text(); // JSON 형식이 아닐 경우 텍스트로 처리
-            }
-
-            if (response.ok) {
+        
+            if (response.status === 200) {
                 Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
-                console.log(result);
-                return result;
+                console.log(response.data);
+                return response.data;
             } else {
-                throw new Error(result.message || '이미지 업로드 실패');
+                throw new Error(response.data.message || '이미지 업로드 실패');
             }
         } catch (error) {
             console.error('이미지 업로드 오류:', error);

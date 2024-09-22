@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, TextInput, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
+import axios from 'axios';
 import { launchImageLibrary } from 'react-native-image-picker';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import BottomNavigation from '../../auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
@@ -9,6 +10,8 @@ export default function NoticePostPage({ navigation }) {
     const [imageUrls, setImageUrls] = useState([]); // 서버에서 받은 이미지 URL 리스트
     const [title, setTitle] = useState('');
     const [content, setContent] = useState('');
+
+    const API_URL = 'http://10.0.2.2:8080';
 
     // 이미지 선택 및 업로드 함수
     const handleSelectImage = () => {
@@ -37,23 +40,15 @@ export default function NoticePostPage({ navigation }) {
                 });
 
                 try {
-                    const uploadResponse = await fetch('http://10.0.2.2:8080/images', {
-                        method: 'POST',
-                        body: formData,
+                    const uploadResponse = await axios.post(`${API_URL}/images`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         },
                     });
-
-                    const contentType = uploadResponse.headers.get('content-type');
-                    let result;
-                    if (contentType && contentType.includes('application/json')) {
-                        result = await uploadResponse.json();
-                    } else {
-                        result = await uploadResponse.text();
-                    }
-
-                    if (uploadResponse.ok) {
+                
+                    const result = uploadResponse.data;
+                
+                    if (uploadResponse.status == 200) {
                         // 이미지 URL 저장
                         const uploadedImageUrl = typeof result === 'string' ? result : result.imageUrl;
                         Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
@@ -91,15 +86,13 @@ export default function NoticePostPage({ navigation }) {
         };
 
         try {
-            const response = await fetch('http://10.0.2.2:8080/notices?memberId=1', {
-                method: 'POST',
+            const response = await axios.post(`${API_URL}/notices?memberId=1`, noticeData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(noticeData),
             });
 
-            if (response.ok) {
+            if (response.status == 200) {
                 Alert.alert('성공', '공지사항이 성공적으로 업로드되었습니다.');
                 navigation.navigate('NoticeList');
                 await sendNotification(title, content);
@@ -122,12 +115,10 @@ export default function NoticePostPage({ navigation }) {
                 message: message,
             };
 
-            await fetch('http://10.0.2.2:8080/api/notifications/notice', {
-                method: 'POST',
+            await axios.post(`${API_URL}/api/notifications/notice`, notificationData, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(notificationData),
             });
 
         } catch (error) {

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator, RefreshControl } from 'react-native';
+import axios from 'axios';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Picker } from '@react-native-picker/picker';
 import BottomNavigation from '../../auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
@@ -15,30 +16,40 @@ export default function NoticeListPage({ navigation }) {
     const [memberId, setMemberId] = useState(1); // 로그인한 사용자의 memberId를 1로 설정
     const loadingRef = useRef(false);
 
+    const API_URL = 'http://10.0.2.2:8080';
+
     // 공지사항 목록을 가져오는 함수
     const fetchNotices = async (reset = false) => {
         if (loadingRef.current) return;
         loadingRef.current = true;
         setLoading(true);
-
+    
         try {
-            const response = await fetch(`http://10.0.2.2:8080/notices?page=${reset ? 1 : page}&size=20&sort=${sortOption}`);
-            const result = await response.json();
-            const data = result.data;
-
+            const response = await axios.get(`${API_URL}/notices`, {
+                params: {
+                    page: reset ? 1 : page,
+                    size: 20,
+                    sort: sortOption,
+                },
+            });
+    
+            const result = response.data; // response.json() 대신 response.data 사용
+            const data = result.data; // 서버 응답의 데이터를 추출
+    
             if (Array.isArray(data)) {
                 if (reset) {
-                    setNotices(data);
-                    setPage(2);
+                    setNotices(data); // 공지사항 리스트 초기화
+                    setPage(2); // 페이지 번호 초기화
                 } else {
-                    setNotices(prevNotices => [...prevNotices, ...data]);
-                    setPage(prevPage => prevPage + 1);
+                    setNotices(prevNotices => [...prevNotices, ...data]); // 기존 리스트에 추가
+                    setPage(prevPage => prevPage + 1); // 페이지 번호 증가
                 }
-
+    
+                // 마지막 페이지인지 확인하여 더 불러올 데이터가 있는지 설정
                 if (result.pageInfo.page >= result.pageInfo.totalPages) {
-                    setHasMore(false);
+                    setHasMore(false); // 더 이상 데이터가 없으면 false
                 } else {
-                    setHasMore(true);
+                    setHasMore(true); // 더 불러올 데이터가 있으면 true
                 }
             } else {
                 console.error('응답 데이터가 배열이 아닙니다:', result);

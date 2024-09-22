@@ -70,6 +70,7 @@ export default function LoginPage({navigation}) {
   const [password, setPassword] = useState('');
   const { login } = useAuth();
 
+
   const saveToKeychain = async (accessToken, refreshToken) => {
     try {
       await Keychain.setGenericPassword('tokens', JSON.stringify({
@@ -94,6 +95,7 @@ export default function LoginPage({navigation}) {
       const response = await axios.post(`${ADS_API_URL}/members/login`, {
         username,
         password,
+        fcmtoken: token,
       });
 
       if (response.status === 200) {

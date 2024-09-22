@@ -40,25 +40,15 @@ export default function BoardPostPage({ navigation }) {
                 });
 
                 try {
-                    const uploadResponse = await fetch('http://10.0.2.2:8080/images', { // 서버에 업로드 요청
-                        method: 'POST',
-                        body: formData,
+                    const uploadResponse = await axios.post(`${API_URL}/images`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         },
                     });
-
-                    const contentType = uploadResponse.headers.get('content-type'); // 서버 응답의 Content-Type 확인
-                    let result;
-
-                    if (contentType && contentType.includes('application/json')) {
-                        result = await uploadResponse.json(); // JSON 형식일 경우 파싱
-                    } else {
-                        result = await uploadResponse.text(); // JSON 형식이 아닐 경우 텍스트로 처리
-                        console.log('Response is not JSON:', result); // HTML이나 텍스트 형식의 응답을 콘솔에 출력
-                    }
-
-                    if (uploadResponse.ok) {
+                
+                    const result = uploadResponse.data;
+                
+                    if (uploadResponse.status === 200) {
                         // 이미지 URL 저장
                         const uploadedImageUrl = typeof result === 'string' ? result : result.imageUrl;
                         Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
