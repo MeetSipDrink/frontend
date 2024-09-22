@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View, FlatList, Modal, Alert, Image, ActivityIndicator } from "react-native";
 import axios from 'axios';
+import Keychain from "react-native-keychain";
 
 const ADS_API_URL = 'http://10.0.2.2:8080';
-const MEMBER_ID = 1; // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
 
-export default function FriendRequestModal({ visible, onClose, onRequestsUpdated }) {
+export default function FriendRequestModal({ visible, onClose, onRequestsUpdated = () => {} }) {
     const [friendRequests, setFriendRequests] = useState([]);
     const [loading, setLoading] = useState(true);
 
@@ -18,11 +18,24 @@ export default function FriendRequestModal({ visible, onClose, onRequestsUpdated
     const fetchFriendRequests = async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`${ADS_API_URL}/friends/${MEMBER_ID}/pending`);
+            const credentials = await Keychain.getGenericPassword();
+            if (!credentials) {
+                throw new Error('No credentials stored');
+            }
+            const { accessToken } = JSON.parse(credentials.password);
+
+            const response = await axios.get(`${ADS_API_URL}/friends/get/pending`, {
+                headers: { Authorization: `Bearer ${accessToken}` },
+            });
             setFriendRequests(response.data.data);
         } catch (error) {
             console.error('Error fetching friend requests:', error);
-            Alert.alert('오류', '친구 요청 목록을 불러오는데 실패했습니다.');
+            if (error.response) {
+                console.error('Error data:', error.response.data);
+                Alert.alert('오류', error.response.data.message || '친구 요청 목록을 불러오는데 실패했습니다.');
+            } else {
+                Alert.alert('오류', '친구 요청 목록을 불러오는데 실패했습니다.');
+            }
         } finally {
             setLoading(false);
         }
@@ -30,26 +43,54 @@ export default function FriendRequestModal({ visible, onClose, onRequestsUpdated
 
     const handleAction = async (action, friendId) => {
         try {
+            const credentials = await Keychain.getGenericPassword();
+            if (!credentials) {
+                throw new Error('No credentials stored');
+            }
+            const { accessToken } = JSON.parse(credentials.password);
+
             if (action === 'accept') {
                 await axios.post(`${ADS_API_URL}/friends/accept`, {
-                    requesterId: MEMBER_ID,
                     recipientId: friendId
+                }, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
                 });
-                Alert.alert('성공', '친구 요청을 수락했습니다.');
+                // Alert.alert('성공', '친구 요청을 수락했습니다.');
             } else if (action === 'reject') {
                 await axios.delete(`${ADS_API_URL}/friends`, {
                     data: {
-                        requesterId: MEMBER_ID,
                         recipientId: friendId
-                    }
+                    },
+                    headers: { Authorization: `Bearer ${accessToken}` },
                 });
                 Alert.alert('성공', '친구 요청을 거절했습니다.');
             }
-            fetchFriendRequests();
-            onRequestsUpdated();
+
+            // onRequestsUpdated가 함수인지 확인한 후 호출
+            if (typeof onRequestsUpdated === 'function') {
+                try {
+                    onRequestsUpdated();
+                } catch (updateError) {
+                    console.error('Error in onRequestsUpdated:', updateError);
+                    Alert.alert('오류', '요청 업데이트에 실패했습니다.');
+                }
+            }
+
+            // 친구 요청 목록 갱신
+            try {
+                await fetchFriendRequests();
+            } catch (fetchError) {
+                console.error('Error fetching friend requests after action:', fetchError);
+                Alert.alert('오류', '친구 요청을 업데이트하는데 실패했습니다.');
+            }
         } catch (error) {
             console.error('Error handling friend request:', error);
-            Alert.alert('오류', '요청 처리에 실패했습니다.');
+            if (error.response) {
+                console.error('Error data:', error.response.data);
+                Alert.alert('오류', error.response.data.message || '요청 처리에 실패했습니다.');
+            } else {
+                Alert.alert('오류', '요청 처리에 실패했습니다.');
+            }
         }
     };
 
@@ -97,7 +138,7 @@ export default function FriendRequestModal({ visible, onClose, onRequestsUpdated
                         <FlatList
                             data={friendRequests}
                             renderItem={renderFriendRequestItem}
-                            keyExtractor={(item) => item.friendId}
+                            keyExtractor={(item) => item.friendId.toString()}
                             style={styles.list}
                         />
                     )}

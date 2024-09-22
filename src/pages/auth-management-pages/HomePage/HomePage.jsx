@@ -52,9 +52,20 @@ const MainPage = () => {
                 },
             });
             setUserName(response.data.data.nickname || '사용자');
+            setIsLoggedIn(true);  // 성공적으로 사용자 정보를 가져왔을 때 로그인 상태 유지
         } catch (error) {
             console.error('Error fetching user info:', error);
-            setUserName('사용자');
+            // 에러 발생 시 로그아웃 처리
+            setIsLoggedIn(false);
+            setUserName('');
+            await Keychain.resetGenericPassword();  // 저장된 토큰 삭제
+
+            // 선택적: 사용자에게 에러 알림
+            Alert.alert(
+                "오류 발생",
+                "사용자 정보를 가져오는 데 실패했습니다. 다시 로그인해 주세요.",
+                [{ text: "확인", onPress: () => navigation.navigate('Login') }]
+            );
         }
     };
 

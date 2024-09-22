@@ -1,25 +1,38 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, TouchableOpacity, View, Text, FlatList, Alert, Image } from "react-native";
+import { StyleSheet, TouchableOpacity, View, Text, FlatList, Alert } from "react-native";
 import axios from 'axios';
-import UserProfileModal from '../UserProfileModal/UserProfileModal';
+import * as Keychain from 'react-native-keychain';
 
 const ADS_API_URL = 'http://10.0.2.2:8080';
 
 export default function BlockListPage({ navigation }) {
     const [blockedUsers, setBlockedUsers] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [profileModalVisible, setProfileModalVisible] = useState(false);
 
     useEffect(() => {
         loadBlockedUsers();
     }, []);
 
+    const getAccessToken = async () => {
+        try {
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                return JSON.parse(credentials.password).accessToken;
+            }
+            throw new Error('No credentials stored');
+        } catch (error) {
+            console.error('Error getting access token:', error);
+            throw error;
+        }
+    };
+
     const loadBlockedUsers = async () => {
         setLoading(true);
         try {
-            const blockerId = 1; // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
-            const response = await axios.get(`${ADS_API_URL}/ban/${blockerId}`);
+            const accessToken = await getAccessToken();
+            const response = await axios.get(`${ADS_API_URL}/ban`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
             setBlockedUsers(response.data);
         } catch (error) {
             console.error('Error fetching blocked users:', error);
@@ -29,10 +42,12 @@ export default function BlockListPage({ navigation }) {
         }
     };
 
-    const unblockUser = async (blockedId) => {
+    const unblockUser = async (banId) => {
         try {
-            const blockerId = 1; // TODO: 실제 로그인한 사용자의 ID로 교체해야 함
-            await axios.delete(`${ADS_API_URL}/ban/${blockerId}/${blockedId}`);
+            const accessToken = await getAccessToken();
+            await axios.delete(`${ADS_API_URL}/ban/${banId}`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
             Alert.alert('성공', '차단이 해제되었습니다.');
             loadBlockedUsers();
         } catch (error) {
@@ -43,20 +58,13 @@ export default function BlockListPage({ navigation }) {
 
     const renderBlockedUserItem = ({ item }) => (
         <View style={styles.userItem}>
+            <Text style={styles.userName}>{item.bannedNickname}</Text>
             <TouchableOpacity
-                onPress={() => {
-                    setSelectedUser(item);
-                    setProfileModalVisible(true);
-                }}
+                style={styles.unblockButton}
+                onPress={() => unblockUser(item.banId)}
             >
-                <Image
-                    source={{ uri: item.friendProfileImage || 'https://via.placeholder.com/50' }}
-                    style={styles.profileImage}
-                />
+                <Text style={styles.unblockButtonText}>차단 해제</Text>
             </TouchableOpacity>
-            <View style={styles.userInfo}>
-                <Text style={styles.userName}>{item.bannedNickname}</Text>
-            </View>
         </View>
     );
 
@@ -67,26 +75,18 @@ export default function BlockListPage({ navigation }) {
             ) : (
                 <>
                     <Text style={styles.sectionTitle}>차단 목록</Text>
-                    <FlatList
-                        data={blockedUsers}
-                        renderItem={renderBlockedUserItem}
-                        keyExtractor={(item) => item.banId.toString()}
-                        style={styles.list}
-                    />
+                    {blockedUsers.length === 0 ? (
+                        <Text style={styles.noBlockedUsersText}>차단한 사용자가 없습니다.</Text>
+                    ) : (
+                        <FlatList
+                            data={blockedUsers}
+                            renderItem={renderBlockedUserItem}
+                            keyExtractor={(item) => item.banId.toString()}
+                            style={styles.list}
+                        />
+                    )}
                 </>
             )}
-
-            <UserProfileModal
-                visible={profileModalVisible}
-                onClose={() => setProfileModalVisible(false)}
-                user={selectedUser}
-                relationship="blocked"
-                onUnblock={(blockedId) => {
-                    unblockUser(blockedId);
-                    setProfileModalVisible(false);
-                }}
-                onProfileUpdate={loadBlockedUsers}
-            />
         </View>
     );
 }
@@ -108,23 +108,31 @@ const styles = StyleSheet.create({
     },
     userItem: {
         flexDirection: 'row',
+        justifyContent: 'space-between',
         alignItems: 'center',
         padding: 15,
         backgroundColor: '#fff',
         borderRadius: 5,
         marginBottom: 10,
     },
-    profileImage: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        marginRight: 15,
-    },
-    userInfo: {
-        flex: 1,
-    },
     userName: {
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    unblockButton: {
+        backgroundColor: '#FF9800',
+        paddingVertical: 5,
+        paddingHorizontal: 10,
+        borderRadius: 5,
+    },
+    unblockButtonText: {
+        color: '#fff',
+        fontSize: 14,
+    },
+    noBlockedUsersText: {
+        fontSize: 16,
+        textAlign: 'center',
+        marginTop: 20,
+        color: 'gray',
     },
 });
