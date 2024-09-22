@@ -3,14 +3,14 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaVi
 import axios from 'axios';
 import { useFocusEffect } from '@react-navigation/native';
 import * as Keychain from 'react-native-keychain';
-import { useAuth } from '../../../AuthContext'; // AuthContext import
+import { useAuth } from '../../../AuthContext';
 
-const ADS_API_URL = 'http://10.0.2.2:8080'; // 안드로이드 에뮬레이터 기준 localhost
+const ADS_API_URL = 'http://10.0.2.2:8080';
 
 export default function MyPage({ navigation }) {
     const [userInfo, setUserInfo] = useState(null);
     const [loading, setLoading] = useState(true);
-    const { isLoggedIn, logout } = useAuth(); // useAuth 훅 사용
+    const { isLoggedIn, logout } = useAuth();
 
     const handleLogout = useCallback(async () => {
         try {
@@ -23,13 +23,47 @@ export default function MyPage({ navigation }) {
                     },
                 });
                 await Keychain.resetGenericPassword();
-                logout(); // AuthContext의 logout 함수 호출
-                navigation.navigate('Home'); // 로그아웃 후 홈 페이지로 이동
+                logout();
+                navigation.navigate('Home');
             }
         } catch (error) {
             console.error('Logout error:', error);
             Alert.alert('로그아웃 실패', '로그아웃 중 오류가 발생했습니다.');
         }
+    }, [navigation, logout]);
+
+    const handleWithdrawal = useCallback(async () => {
+        Alert.alert(
+            "회원 탈퇴",
+            "정말로 탈퇴하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+            [
+                { text: "취소", style: "cancel" },
+                {
+                    text: "탈퇴",
+                    style: "destructive",
+                    onPress: async () => {
+                        try {
+                            const credentials = await Keychain.getGenericPassword();
+                            if (credentials) {
+                                const { accessToken } = JSON.parse(credentials.password);
+                                await axios.delete(`${ADS_API_URL}/members`, {
+                                    headers: {
+                                        Authorization: `Bearer ${accessToken}`,
+                                    },
+                                });
+                                await Keychain.resetGenericPassword();
+                                logout();
+                                Alert.alert("탈퇴 완료", "회원 탈퇴가 완료되었습니다.");
+                                navigation.navigate('Home');
+                            }
+                        } catch (error) {
+                            console.error('Withdrawal error:', error);
+                            Alert.alert('탈퇴 실패', '회원 탈퇴 중 오류가 발생했습니다.');
+                        }
+                    }
+                }
+            ]
+        );
     }, [navigation, logout]);
 
     const fetchUserInfo = useCallback(async () => {
@@ -126,7 +160,10 @@ export default function MyPage({ navigation }) {
                 <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('BlockList')}>
                     <Text style={styles.secondaryButtonText}>차단목록</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.secondaryButton, styles.dangerButton]}>
+                <TouchableOpacity
+                    style={[styles.secondaryButton, styles.dangerButton]}
+                    onPress={handleWithdrawal}
+                >
                     <Text style={[styles.secondaryButtonText, styles.dangerButtonText]}>탈퇴</Text>
                 </TouchableOpacity>
             </View>
