@@ -215,6 +215,7 @@ export default function FriendListPage({ navigation }) {
                     onChangeText={setNewFriendId}
                     placeholder="친구 ID 입력"
                     keyboardType="numeric"
+                    placeholderTextColor="#888"
                 />
                 <TouchableOpacity style={styles.addButton} onPress={addFriend}>
                     <Text style={styles.buttonText}>친구 추가</Text>
@@ -234,7 +235,7 @@ export default function FriendListPage({ navigation }) {
             </TouchableOpacity>
 
             {loading ? (
-                <ActivityIndicator size="large" color="#0000ff" />
+                <ActivityIndicator size="large" color="#F9B300" />
             ) : (
                 <>
                     <Text style={styles.sectionTitle}>친구 목록</Text>
@@ -263,7 +264,7 @@ export default function FriendListPage({ navigation }) {
                 user={selectedFriend}
                 relationship="friend"
                 onUnfriend={removeFriend}
-                onProfileUpdate={loadFriends} // 이제 `removeFriend`가 이미 `loadFriends`를 호출하므로 중복 호출을 피할 수 있습니다.
+                onProfileUpdate={loadFriends}
             />
         </View>
     );
@@ -273,7 +274,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        backgroundColor: '#f8f8f8',
+        backgroundColor: '#FFF9E6', // 밝은 노란색 배경
     },
     addFriendContainer: {
         flexDirection: 'row',
@@ -282,22 +283,23 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         height: 40,
-        borderColor: 'gray',
+        borderColor: '#F9B300',
         borderWidth: 1,
         paddingHorizontal: 10,
         marginRight: 10,
         borderRadius: 5,
         backgroundColor: '#fff',
+        color: '#333',
     },
     addButton: {
-        backgroundColor: '#4CAF50',
+        backgroundColor: '#F9B300',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
         justifyContent: 'center',
     },
     requestButton: {
-        backgroundColor: '#2196F3',
+        backgroundColor: '#F9B300',
         paddingVertical: 10,
         paddingHorizontal: 20,
         borderRadius: 5,
@@ -307,7 +309,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     badge: {
-        backgroundColor: 'red',
+        backgroundColor: '#FF6B6B',
         borderRadius: 10,
         width: 20,
         height: 20,
@@ -323,6 +325,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 14,
         textAlign: 'center',
+        fontWeight: 'bold',
     },
     list: {
         flex: 1,
@@ -331,20 +334,22 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         padding: 15,
-        backgroundColor: '#fff',
+        backgroundColor: '#FFF',
         borderRadius: 5,
         marginBottom: 10,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 2,
-        elevation: 2,
+        shadowColor: '#F9B300',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+        elevation: 3,
     },
     profileImage: {
         width: 50,
         height: 50,
         borderRadius: 25,
         marginRight: 15,
+        borderWidth: 2,
+        borderColor: '#F9B300',
     },
     friendInfo: {
         flex: 1,
@@ -352,17 +357,19 @@ const styles = StyleSheet.create({
     friendName: {
         fontSize: 16,
         fontWeight: 'bold',
+        color: '#333',
     },
     sectionTitle: {
         fontSize: 18,
         fontWeight: 'bold',
         marginTop: 20,
         marginBottom: 10,
+        color: '#F9B300',
     },
     noFriendsText: {
         fontSize: 16,
         textAlign: 'center',
         marginTop: 20,
-        color: 'gray',
+        color: '#888',
     },
 });
