@@ -116,7 +116,7 @@ const MainPage = () => {
         setTimeout(() => {
             setIsResultShown(false);
             resetPosition();
-        }, 2000);
+        }, 900);
     };
 
     const resetPosition = () => {
