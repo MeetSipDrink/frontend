@@ -22,9 +22,6 @@ import * as Keychain from 'react-native-keychain'; // Keychain 불러오기
 const API_URL = 'http://10.0.2.2:8080';
 const { width } = Dimensions.get('window');
 
-// 로그인한 사용자의 memberId를 1로 고정
-const loggedInUserId = 1;
-
 const BoardViewPage = ({ route, navigation }) => {
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -33,6 +30,7 @@ const BoardViewPage = ({ route, navigation }) => {
     const [comments, setComments] = useState([]);
     const [newCommentContent, setNewCommentContent] = useState('');
     const [isLiked, setIsLiked] = useState(false);
+    const [loggedInUserId, setLoggedInUserId] = useState(null);
 
     const flatListRef = useRef(null);
     const scrollViewRef = useRef(null);
@@ -56,8 +54,30 @@ const BoardViewPage = ({ route, navigation }) => {
         }
     };
 
+    const fetchMemberInfo = async () => {
+        try {
+            const token = await getAccessToken(); // 액세스 토큰 가져오기
+            if (!token) {
+                throw new Error('토큰을 가져올 수 없습니다.');
+            }
+
+            const response = await axios.get(`${API_URL}/members`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const memberId = response.data.data.memberId; // memberId 값 가져오기
+            setLoggedInUserId(memberId); // 상태로 저장
+        } catch (error) {
+            console.error('사용자 정보 가져오기 실패:', error);
+            Alert.alert('오류', '사용자 정보를 가져오는데 실패했습니다.');
+        }
+    };
+
     const fetchPostData = useCallback(async () => {
         try {
+            await fetchMemberInfo();
             await fetchPost();
             await fetchComments();
             await checkLikeStatus();
@@ -209,7 +229,6 @@ const BoardViewPage = ({ route, navigation }) => {
         try {
             const token = await getAccessToken(); // 액세스 토큰 가져오기
             const requestBody = {
-                memberId: loggedInUserId,
                 content: newCommentContent,
             };
 
@@ -259,7 +278,6 @@ const BoardViewPage = ({ route, navigation }) => {
                     comment={comment}
                     postId={postId}
                     allComments={comments}
-                    loggedInUserId={loggedInUserId}
                     onCommentAdded={fetchComments}
                     onCommentUpdated={fetchComments}
                     onCommentDeleted={fetchComments}
