@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, TextInput, Alert, Keyboard, TouchableWithoutFeedback } from 'react-native';
 import axios from 'axios';
+import * as Keychain from 'react-native-keychain';
 import { launchImageLibrary } from 'react-native-image-picker';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import BottomNavigation from '../../auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
@@ -78,28 +79,34 @@ export default function NoticePostPage({ navigation }) {
             Alert.alert('알림', '제목과 내용을 입력해주세요.');
             return;
         }
-
+    
         const noticeData = {
             title,
             content,
             imageUrls, // 업로드된 이미지 URL 리스트
         };
-
+    
+        // 액세스 토큰 가져오기
+        const credentials = await Keychain.getGenericPassword();
+        if (!credentials) {
+            Alert.alert('오류', '로그인이 필요합니다.');
+            return;
+        }
+        const { accessToken } = JSON.parse(credentials.password);
+    
         try {
-            const response = await axios.post(`${API_URL}/notices?memberId=1`, noticeData, {
+            const response = await axios.post(`${API_URL}/notices`, noticeData, {
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`, // 액세스 토큰 추가
                 },
             });
-
-            if (response.status == 200) {
+    
+            if (response.status === 201) {
                 Alert.alert('성공', '공지사항이 성공적으로 업로드되었습니다.');
                 navigation.navigate('NoticeList');
-                await sendNotification(title, content);
-
             } else {
                 Alert.alert('실패', '공지사항 업로드에 실패했습니다.');
-                console.error(result);
             }
         } catch (error) {
             console.error('공지사항 업로드 오류:', error);

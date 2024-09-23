@@ -4,6 +4,7 @@ import axios from 'axios';
 import { launchImageLibrary } from 'react-native-image-picker';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import BottomNavigation from '../../auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
+import * as Keychain from 'react-native-keychain';  // Keychain 추가
 
 export default function NoticeEditPage({ route, navigation }) {
     const { noticeId } = route.params; // Notice ID 전달받음
@@ -22,7 +23,7 @@ export default function NoticeEditPage({ route, navigation }) {
             maxHeight: 600,
             quality: 1,
         };
-
+    
         launchImageLibrary(options, async (response) => {
             if (response.didCancel) {
                 Alert.alert('알림', '이미지 선택이 취소되었습니다.');
@@ -31,7 +32,7 @@ export default function NoticeEditPage({ route, navigation }) {
             } else {
                 const uri = response.assets[0].uri;
                 setImages(prevImages => [...prevImages, { uri }]); // 선택된 이미지를 추가
-
+    
                 // 이미지 업로드 (즉시 서버에 업로드)
                 const formData = new FormData();
                 formData.append('multipartFile', {
@@ -39,23 +40,17 @@ export default function NoticeEditPage({ route, navigation }) {
                     type: 'image/jpeg',
                     name: `image_${new Date().getTime()}.jpg`,
                 });
-
+    
                 try {
                     const uploadResponse = await axios.post(`${API_URL}/images`, formData, {
                         headers: {
                             'Content-Type': 'multipart/form-data',
                         },
                     });
-
-                    const contentType = uploadResponse.headers.get('content-type');
-                    let result;
-                    if (contentType && contentType.includes('application/json')) {
-                        result = await uploadResponse.json();
-                    } else {
-                        result = await uploadResponse.text();
-                    }
-
-                    if (uploadResponse.ok) {
+    
+                    const result = uploadResponse.data; // uploadResponse.json() 대신 uploadResponse.data 사용
+    
+                    if (uploadResponse.status === 200) {
                         Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
                         setImageUrls(prevUrls => [...prevUrls, result]); // 새로 업로드된 이미지 URL 추가
                     } else {
@@ -89,13 +84,24 @@ export default function NoticeEditPage({ route, navigation }) {
         };
 
         try {
+            // Keychain에서 액세스 토큰 가져오기
+            const credentials = await Keychain.getGenericPassword();
+            if (!credentials) {
+                Alert.alert('오류', '로그인이 필요합니다.');
+                return;
+            }
+
+            const { accessToken } = JSON.parse(credentials.password);
+
+            // 공지사항 수정 요청 (액세스 토큰을 헤더에 포함)
             const response = await axios.patch(`${API_URL}/notices/${noticeId}?memberId=1`, noticeData, {
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${accessToken}`,  // 액세스 토큰 추가
                 },
             });
 
-            if (response.ok) {
+            if (response.status == 200) {
                 Alert.alert('성공', '공지사항이 성공적으로 수정되었습니다.');
                 // 수정된 공지사항 데이터를 전달하며 NoticeView로 이동
                 navigation.navigate('NoticeView', { noticeId });
