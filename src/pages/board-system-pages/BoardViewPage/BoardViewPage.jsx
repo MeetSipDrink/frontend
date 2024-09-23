@@ -17,6 +17,7 @@ import {
 import axios from 'axios';
 import Comment from '../CommentComponents/CommentComponents';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import * as Keychain from 'react-native-keychain'; // Keychain 불러오기
 
 const API_URL = 'http://10.0.2.2:8080';
 const { width } = Dimensions.get('window');
@@ -38,6 +39,23 @@ const BoardViewPage = ({ route, navigation }) => {
 
     const { postId } = route.params;
 
+    // 토큰을 가져오는 함수
+    const getAccessToken = async () => {
+        try {
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                const { accessToken } = JSON.parse(credentials.password);
+                return accessToken;
+            } else {
+                console.error('토큰을 가져올 수 없습니다.');
+                return null;
+            }
+        } catch (error) {
+            console.error('Keychain에서 토큰 가져오기 오류:', error);
+            return null;
+        }
+    };
+
     const fetchPostData = useCallback(async () => {
         try {
             await fetchPost();
@@ -57,13 +75,14 @@ const BoardViewPage = ({ route, navigation }) => {
         }, [fetchPostData])
     );
 
-    useEffect(() => {
-        fetchPostData();
-    }, [fetchPostData]);
-
     const fetchPost = async () => {
         try {
-            const response = await axios.get(`${API_URL}/posts/${postId}`);
+            const token = await getAccessToken(); // 액세스 토큰 가져오기
+            const response = await axios.get(`${API_URL}/posts/${postId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             setPost(response.data.data);
         } catch (err) {
             setError('게시물을 불러오는 데 실패했습니다.');
@@ -72,7 +91,8 @@ const BoardViewPage = ({ route, navigation }) => {
 
     const fetchComments = async () => {
         try {
-            const response = await axios.get(`${API_URL}/posts/${postId}/comment`);
+            const response = await axios.get(`${API_URL}/posts/${postId}/comments`, {
+            });
             setComments(response.data);
         } catch (error) {
             console.error('댓글 로딩 실패:', error);
@@ -83,8 +103,11 @@ const BoardViewPage = ({ route, navigation }) => {
     // 좋아요 상태 확인 함수
     const checkLikeStatus = async () => {
         try {
-            const response = await axios.get(`${API_URL}/posts/${postId}/like`, {
-                params: { memberId: loggedInUserId }
+            const token = await getAccessToken(); // 액세스 토큰 가져오기
+            const response = await axios.get(`${API_URL}/posts/${postId}/likes`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             });
             console.log('Like status response:', response.data);
             // 응답값이 true인지 false인지 명확히 확인하여 설정
@@ -102,15 +125,20 @@ const BoardViewPage = ({ route, navigation }) => {
     // 좋아요 토글 함수 수정
     const toggleLike = async () => {
         try {
+            const token = await getAccessToken(); // 액세스 토큰 가져오기
             // 1. POST 요청으로 좋아요 토글
-            await axios.post(`${API_URL}/posts/${postId}/like`, null, {
-                params: { memberId: loggedInUserId }
+            await axios.post(`${API_URL}/posts/${postId}/likes`, null, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             });
             console.log('Toggle like response: POST completed');
 
             // 2. GET 요청으로 최신 좋아요 상태 가져오기
-            const getResponse = await axios.get(`${API_URL}/posts/${postId}/like`, {
-                params: { memberId: loggedInUserId }
+            const getResponse = await axios.get(`${API_URL}/posts/${postId}/likes`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
             });
             console.log('Toggle like response: GET', getResponse.data);
 
@@ -153,8 +181,11 @@ const BoardViewPage = ({ route, navigation }) => {
                     text: '예',
                     onPress: async () => {
                         try {
+                            const token = await getAccessToken(); // 액세스 토큰 가져오기
                             await axios.delete(`${API_URL}/posts/${postId}`, {
-                                params: { memberId: loggedInUserId }
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                },
                             });
                             Alert.alert('성공', '게시글이 삭제되었습니다.');
                             navigation.goBack(); // 삭제 후 이전 화면으로 이동
@@ -176,14 +207,16 @@ const BoardViewPage = ({ route, navigation }) => {
         }
 
         try {
+            const token = await getAccessToken(); // 액세스 토큰 가져오기
             const requestBody = {
                 memberId: loggedInUserId,
                 content: newCommentContent,
             };
 
-            await axios.post(`${API_URL}/posts/${postId}/comment`, requestBody,{
+            await axios.post(`${API_URL}/posts/${postId}/comments`, requestBody, {
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
                 },
             });
             setNewCommentContent('');

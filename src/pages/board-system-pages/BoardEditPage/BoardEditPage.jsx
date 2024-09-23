@@ -3,10 +3,9 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View, ScrollView, Image,
 import axios from 'axios';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { launchImageLibrary } from 'react-native-image-picker';
+import * as Keychain from 'react-native-keychain'; // Keychain 추가
 
 const API_URL = 'http://10.0.2.2:8080';
-
-const loggedInUserId = 1;
 
 export default function BoardEditPage() {
     const route = useRoute();
@@ -22,9 +21,38 @@ export default function BoardEditPage() {
         fetchPost();
     }, []);
 
-    const fetchPost = async () => {
+    // 토큰 가져오기 함수
+    const getAccessToken = async () => {
         try {
-            const response = await axios.get(`${API_URL}/posts/${postId}`);
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                const { accessToken } = JSON.parse(credentials.password);
+                return accessToken;
+            } else {
+                console.error('토큰을 가져올 수 없습니다.');
+                return null;
+            }
+        } catch (error) {
+            console.error('Keychain에서 토큰 가져오기 오류:', error);
+            return null;
+        }
+    };
+
+    const fetchPost = async () => {
+        setLoading(true);
+        try {
+            const token = await getAccessToken();
+            if (!token) {
+                Alert.alert('오류', '토큰을 가져올 수 없습니다. 다시 로그인 해주세요.');
+                return;
+            }
+
+            const response = await axios.get(`${API_URL}/posts/${postId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
             const postData = response.data.data;
             setTitle(postData.title);
             setContent(postData.content);
@@ -52,8 +80,13 @@ export default function BoardEditPage() {
         }
 
         try {
+            const token = await getAccessToken();
+            if (!token) {
+                Alert.alert('오류', '토큰을 가져올 수 없습니다. 다시 로그인 해주세요.');
+                return;
+            }
+
             const postData = {
-                memberId: loggedInUserId,
                 title,
                 content,
                 imageUrl1: images[0],
@@ -62,11 +95,12 @@ export default function BoardEditPage() {
                 imageUrl4: images[3],
                 imageUrl5: images[4],
                 imageUrl6: images[5],
-              };
+            };
 
             const response = await axios.patch(`${API_URL}/posts/${postId}`, postData, {
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`, // 토큰을 헤더에 추가
                 }
             });
 
@@ -92,15 +126,21 @@ export default function BoardEditPage() {
         });
 
         try {
+            const token = await getAccessToken();
+            if (!token) {
+                Alert.alert('오류', '토큰을 가져올 수 없습니다. 다시 로그인 해주세요.');
+                return;
+            }
+
             const response = await axios.post(`${API_URL}/images`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
+                    Authorization: `Bearer ${token}`, // 토큰을 헤더에 추가
                 },
             });
         
             if (response.status === 200) {
                 Alert.alert('성공', '이미지가 성공적으로 업로드되었습니다.');
-                console.log(response.data);
                 return response.data;
             } else {
                 throw new Error(response.data.message || '이미지 업로드 실패');

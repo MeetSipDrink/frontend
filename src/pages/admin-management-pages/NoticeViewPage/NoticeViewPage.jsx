@@ -1,56 +1,68 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { View, Text, Image, ActivityIndicator, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import axios from 'axios';
 import Swiper from 'react-native-swiper';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import BottomNavigation from '../../auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
+import * as Keychain from 'react-native-keychain';
 
 export default function NoticeViewPage({ route, navigation }) {
     const { noticeId } = route.params;
     const [notice, setNotice] = useState(null); // 공지사항 데이터를 저장
     const [loading, setLoading] = useState(true); // 로딩 상태 저장
-    const memberId = 1; // 현재 로그인한 사용자의 ID
+    const [isAdmin, setIsAdmin] = useState(false); // 관리자인지 여부 저장
 
     const API_URL = 'http://10.0.2.2:8080';
 
-    useEffect(() => {
-        // 공지사항 데이터 가져오기 함수
-        const fetchNoticeData = async () => {
-            if (noticeId) {
-                try {
-                    const response = await axios.get(`${API_URL}/notices/${noticeId}`);
-                    setNotice(response.data.data); // data.data로 접근
-                    setLoading(false);
-                } catch (error) {
-                    console.error('공지사항을 불러오는 중 오류가 발생했습니다:', error);
-                    setLoading(false);
+    // 공지사항 데이터 가져오기 함수
+    const fetchNoticeData = useCallback(async () => {
+        setLoading(true);
+        try {
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                const { accessToken } = JSON.parse(credentials.password);
+
+                // 사용자 정보 가져오기 (admin 확인)
+                const userResponse = await axios.get(`${API_URL}/members`, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+
+                if (userResponse.data.data.email === 'admin@gmail.com') {
+                    setIsAdmin(true); // 관리자인 경우에만 버튼 보이게 설정
                 }
-            } else {
-                console.error('noticeId가 전달되지 않았습니다.');
+
+                // 공지사항 정보 가져오기
+                const response = await axios.get(`${API_URL}/notices/${noticeId}`, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+
+                setNotice(response.data.data); // 공지사항 데이터 저장
             }
-        };
-    
-        // 처음 마운트될 때 공지사항 데이터를 가져옴
-        fetchNoticeData();
-    
-        // 페이지에 포커스가 될 때마다 데이터를 새로 가져옴
-        const unsubscribe = navigation.addListener('focus', () => {
-            setLoading(true); // 새로 로딩 상태로 설정
-            fetchNoticeData(); // 데이터를 새로 가져옴
-        });
-    
-        return unsubscribe;
-    }, [noticeId, navigation]);
+        } catch (error) {
+            console.error('공지사항을 불러오는 중 오류가 발생했습니다:', error);
+            Alert.alert('오류', '공지사항을 불러오는 중 문제가 발생했습니다.');
+        } finally {
+            setLoading(false);
+        }
+    }, [noticeId]);
 
     // 삭제 함수
     const handleDelete = async () => {
         try {
-            const response = await axios.delete(`${API_URL}/notices/${noticeId}?memberId=${memberId}`);
-            if (response.ok) {
-                Alert.alert('성공', '공지사항이 삭제되었습니다.');
-                navigation.navigate('NoticeList');
-            } else {
-                Alert.alert('실패', '공지사항 삭제에 실패했습니다.');
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                const { accessToken } = JSON.parse(credentials.password);
+
+                const response = await axios.delete(`${API_URL}/notices/${noticeId}`, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+
+                if (response.status === 204) {
+                    Alert.alert('성공', '공지사항이 삭제되었습니다.');
+                    navigation.navigate('NoticeList');
+                } else {
+                    Alert.alert('실패', '공지사항 삭제에 실패했습니다.');
+                }
             }
         } catch (error) {
             console.error('공지사항 삭제 오류:', error);
@@ -62,6 +74,14 @@ export default function NoticeViewPage({ route, navigation }) {
     const handleEdit = () => {
         navigation.navigate('NoticeEdit', { noticeId }); // 수정 페이지로 이동
     };
+
+    // 페이지에 포커스가 될 때마다 데이터를 새로 가져옴
+    useEffect(() => {
+        const unsubscribe = navigation.addListener('focus', () => {
+            fetchNoticeData(); // 데이터를 새로 가져옴
+        });
+        return unsubscribe;
+    }, [navigation, fetchNoticeData]);
 
     // 로딩 중일 때 로딩 스피너를 표시
     if (loading) {
@@ -125,8 +145,8 @@ export default function NoticeViewPage({ route, navigation }) {
                     )}
                     <Text style={styles.nickname}>{notice.nickname}</Text>
 
-                    {/* 수정 및 삭제 버튼 (memberId가 1인 사용자만 표시) */}
-                    {memberId === 1 && (
+                    {/* 수정 및 삭제 버튼 (admin만 표시) */}
+                    {isAdmin && (
                         <View style={styles.buttonContainer}>
                             <TouchableOpacity style={styles.editButton} onPress={handleEdit}>
                                 <AntDesign name="edit" size={25} color="#007bff" />

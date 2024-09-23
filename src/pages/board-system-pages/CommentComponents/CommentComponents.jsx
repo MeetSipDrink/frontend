@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, Image, StyleSheet } from 'react-native';
 import axios from 'axios';
+import * as Keychain from 'react-native-keychain'; // Keychain 추가
 
 const API_URL = 'http://10.0.2.2:8080';
 
@@ -8,7 +9,6 @@ const Comment = ({
                      comment,
                      postId,
                      allComments,
-                     loggedInUserId = 1,
                      onCommentAdded,
                      onCommentUpdated,
                      onCommentDeleted,
@@ -17,6 +17,41 @@ const Comment = ({
     const [isEditing, setIsEditing] = useState(false);
     const [isReplying, setIsReplying] = useState(false);
     const [inputContent, setInputContent] = useState('');
+    const [loggedInUserId, setLoggedInUserId] = useState(null);
+
+    // 토큰을 가져오는 함수
+    const getAccessToken = async () => {
+        try {
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                const { accessToken } = JSON.parse(credentials.password);
+                return accessToken;
+            } else {
+                console.error('토큰을 가져올 수 없습니다.');
+                return null;
+            }
+        } catch (error) {
+            console.error('Keychain에서 토큰 가져오기 오류:', error);
+            return null;
+        }
+    };
+
+    // 로그인한 사용자 ID를 가져오는 함수
+    const fetchLoggedInUserId = async () => {
+        try {
+            const token = await getAccessToken();
+            if (token) {
+                const response = await axios.get(`${API_URL}/members`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                setLoggedInUserId(response.data.data.memberId);
+            }
+        } catch (error) {
+            console.error('사용자 정보 가져오기 오류:', error);
+        }
+    };
 
     const handleUpdate = async () => {
         if (!inputContent.trim()) {
@@ -25,9 +60,13 @@ const Comment = ({
         }
 
         try {
-            await axios.patch(`${API_URL}/posts/${postId}/comment/${comment.postCommentId}`, {
-                memberId: loggedInUserId,
+            const token = await getAccessToken(); // 액세스 토큰 가져오기
+            await axios.patch(`${API_URL}/posts/${postId}/comments`, {
                 content: inputContent,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // 토큰을 헤더에 포함
+                },
             });
             setIsEditing(false);
             setInputContent('');
@@ -40,8 +79,11 @@ const Comment = ({
 
     const handleDelete = async () => {
         try {
-            await axios.delete(`${API_URL}/posts/${postId}/comment/${comment.postCommentId}`, {
-                params: { memberId: loggedInUserId },
+            const token = await getAccessToken(); // 액세스 토큰 가져오기
+            await axios.delete(`${API_URL}/posts/${postId}/comments`, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // 토큰을 헤더에 포함
+                },
             });
             onCommentDeleted();
         } catch (error) {
@@ -57,14 +99,18 @@ const Comment = ({
         }
 
         try {
+            const token = await getAccessToken(); // 액세스 토큰 가져오기
             const requestBody = {
-                memberId: loggedInUserId,
                 postId: postId,
                 content: inputContent,
                 parentCommentId: comment.postCommentId,
             };
 
-            await axios.post(`${API_URL}/posts/${postId}/comment`, requestBody);
+            await axios.post(`${API_URL}/posts/${postId}/comment`, requestBody, {
+                headers: {
+                    Authorization: `Bearer ${token}`, // 토큰을 헤더에 포함
+                },
+            });
             setIsReplying(false);
             setInputContent('');
             onCommentAdded();
@@ -91,6 +137,11 @@ const Comment = ({
     };
 
     const replies = allComments.filter(c => c.parentCommentId === comment.postCommentId);
+
+    useEffect(() => {
+        fetchLoggedInUserId(); // 로그 출력 추가
+        console.log('LoggedInUserId:', loggedInUserId);
+    }, [loggedInUserId]);
 
     return (
         <View style={[styles.commentContainer, {
@@ -155,7 +206,6 @@ const Comment = ({
                     comment={reply}
                     postId={postId}
                     allComments={allComments}
-                    loggedInUserId={loggedInUserId}
                     onCommentAdded={onCommentAdded}
                     onCommentUpdated={onCommentUpdated}
                     onCommentDeleted={onCommentDeleted}

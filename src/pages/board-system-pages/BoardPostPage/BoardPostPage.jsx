@@ -4,6 +4,7 @@ import axios from 'axios';
 import { launchImageLibrary } from 'react-native-image-picker';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import BottomNavigation from '../../auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
+import * as Keychain from 'react-native-keychain';
 
 const API_URL = 'http://10.0.2.2:8080';
 
@@ -72,6 +73,22 @@ export default function BoardPostPage({ navigation }) {
         setImageUrls(imageUrls.filter((_, i) => i !== index)); // 업로드된 이미지 URL에서도 삭제
     };
 
+    // 토큰 가져오기 함수
+    const getAccessToken = async () => {
+        try {
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                const { accessToken } = JSON.parse(credentials.password);
+                return accessToken;
+            } else {
+                console.error('토큰을 가져올 수 없습니다.');
+                return null;
+            }
+        } catch (error) {
+            console.error('Keychain에서 토큰 가져오기 오류:', error);
+            return null;
+        }
+    };
 
     const handleSubmit = async () => {
         if (!title || !content) {
@@ -80,10 +97,18 @@ export default function BoardPostPage({ navigation }) {
         }
         try {
             console.log(imageUrls);
+
+            // 토큰 가져오기
+            const token = await getAccessToken();
+            if (!token) {
+                Alert.alert('오류', '토큰을 가져올 수 없습니다. 다시 로그인 해주세요.');
+                return;
+            }
+
             const postData = {
                 title,
                 content,
-                memberId: 1,
+                memberId: 1,  // 실제 프로젝트에서는 백엔드에서 토큰으로 memberId를 구하는 것이 좋습니다.
                 imageUrl1: imageUrls[0] || null,
                 imageUrl2: imageUrls[1] || null,
                 imageUrl3: imageUrls[2] || null,
@@ -95,6 +120,7 @@ export default function BoardPostPage({ navigation }) {
             const response = await axios.post(`${API_URL}/posts`, postData, {
                 headers: {
                     'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`, // 토큰을 헤더에 추가
                 },
             });
 

@@ -5,6 +5,7 @@ import AntDesign from 'react-native-vector-icons/AntDesign';
 import { Picker } from '@react-native-picker/picker';
 import BottomNavigation from '../../auth-management-pages/HomePage/bottomNavigation/bottomNavigation';
 import { useFocusEffect } from '@react-navigation/native';
+import * as Keychain from 'react-native-keychain';
 
 export default function NoticeListPage({ navigation }) {
     const [notices, setNotices] = useState([]);
@@ -13,10 +14,32 @@ export default function NoticeListPage({ navigation }) {
     const [page, setPage] = useState(1);
     const [hasMore, setHasMore] = useState(true);
     const [sortOption, setSortOption] = useState('createdAt_desc');
-    const [memberId, setMemberId] = useState(1); // 로그인한 사용자의 memberId를 1로 설정
+    const [isAdmin, setIsAdmin] = useState(false); // 관리자인지 여부를 저장
     const loadingRef = useRef(false);
 
     const API_URL = 'http://10.0.2.2:8080';
+
+    // 관리자 여부를 확인하는 함수
+    const checkAdminStatus = useCallback(async () => {
+        try {
+            const credentials = await Keychain.getGenericPassword();
+            if (credentials) {
+                const { accessToken } = JSON.parse(credentials.password);
+                
+                // 사용자 정보 가져오기
+                const response = await axios.get(`${API_URL}/members`, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+
+                // 이메일이 관리자 이메일인 경우에만 isAdmin을 true로 설정
+                if (response.data.data.email === 'admin@gmail.com') {
+                    setIsAdmin(true);
+                }
+            }
+        } catch (error) {
+            console.error('관리자 권한을 확인하는 중 오류 발생:', error);
+        }
+    }, []);
 
     // 공지사항 목록을 가져오는 함수
     const fetchNotices = async (reset = false) => {
@@ -33,23 +56,22 @@ export default function NoticeListPage({ navigation }) {
                 },
             });
     
-            const result = response.data; // response.json() 대신 response.data 사용
-            const data = result.data; // 서버 응답의 데이터를 추출
+            const result = response.data;
+            const data = result.data;
     
             if (Array.isArray(data)) {
                 if (reset) {
-                    setNotices(data); // 공지사항 리스트 초기화
-                    setPage(2); // 페이지 번호 초기화
+                    setNotices(data);
+                    setPage(2);
                 } else {
-                    setNotices(prevNotices => [...prevNotices, ...data]); // 기존 리스트에 추가
-                    setPage(prevPage => prevPage + 1); // 페이지 번호 증가
+                    setNotices(prevNotices => [...prevNotices, ...data]);
+                    setPage(prevPage => prevPage + 1);
                 }
     
-                // 마지막 페이지인지 확인하여 더 불러올 데이터가 있는지 설정
                 if (result.pageInfo.page >= result.pageInfo.totalPages) {
-                    setHasMore(false); // 더 이상 데이터가 없으면 false
+                    setHasMore(false);
                 } else {
-                    setHasMore(true); // 더 불러올 데이터가 있으면 true
+                    setHasMore(true);
                 }
             } else {
                 console.error('응답 데이터가 배열이 아닙니다:', result);
@@ -74,8 +96,9 @@ export default function NoticeListPage({ navigation }) {
         useCallback(() => {
             setPage(1);
             setHasMore(true);
-            fetchNotices(true); // 화면이 포커스될 때 공지사항 갱신
-        }, [sortOption])
+            fetchNotices(true);
+            checkAdminStatus(); // 관리자 여부 확인
+        }, [sortOption, checkAdminStatus])
     );
 
     const handleLoadMore = () => {
@@ -156,8 +179,8 @@ export default function NoticeListPage({ navigation }) {
                 }
             />
 
-            {/* memberId가 1인 사용자만 + 버튼 보이게 */}
-            {memberId === 1 && (
+            {/* isAdmin이 true인 경우에만 + 버튼 보이게 */}
+            {isAdmin && (
                 <TouchableOpacity
                     style={styles.addButton}
                     onPress={() => navigation.navigate('NoticePost')}
