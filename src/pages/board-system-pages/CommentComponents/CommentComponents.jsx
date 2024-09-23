@@ -61,7 +61,7 @@ const Comment = ({
 
         try {
             const token = await getAccessToken(); // 액세스 토큰 가져오기
-            await axios.patch(`${API_URL}/posts/${postId}/comments`, {
+            await axios.patch(`${API_URL}/posts/${postId}/comments/${comment.postCommentId}`, {
                 content: inputContent,
             }, {
                 headers: {
@@ -80,7 +80,7 @@ const Comment = ({
     const handleDelete = async () => {
         try {
             const token = await getAccessToken(); // 액세스 토큰 가져오기
-            await axios.delete(`${API_URL}/posts/${postId}/comments`, {
+            await axios.delete(`${API_URL}/posts/${postId}/comments/${comment.postCommentId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`, // 토큰을 헤더에 포함
                 },
@@ -106,7 +106,7 @@ const Comment = ({
                 parentCommentId: comment.postCommentId,
             };
 
-            await axios.post(`${API_URL}/posts/${postId}/comment`, requestBody, {
+            await axios.post(`${API_URL}/posts/${postId}/comments`, requestBody, {
                 headers: {
                     Authorization: `Bearer ${token}`, // 토큰을 헤더에 포함
                 },
