@@ -43,7 +43,8 @@
     "@babel/core": "^7.20.0",
     "@babel/plugin-transform-class-properties": "^7.21.0",
     "@babel/plugin-transform-nullish-coalescing-operator": "^7.21.0",
-    "@babel/plugin-transform-optional-chaining": "^7.21.0"
+    "@babel/plugin-transform-optional-chaining": "^7.21.0",
+    "@react-native/typescript-config": "^0.76.0"
   },
   "private": true
 }

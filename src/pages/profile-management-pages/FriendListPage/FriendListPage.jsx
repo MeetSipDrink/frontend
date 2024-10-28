@@ -214,7 +214,7 @@ export default function FriendListPage({ navigation }) {
                     value={newFriendId}
                     onChangeText={setNewFriendId}
                     placeholder="친구 ID 입력"
-                    keyboardType="numeric"
+                    keyboardType="keyboard"
                     placeholderTextColor="#888"
                 />
                 <TouchableOpacity style={styles.addButton} onPress={addFriend}>
