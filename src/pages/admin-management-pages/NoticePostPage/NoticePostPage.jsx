@@ -104,6 +104,7 @@ export default function NoticePostPage({ navigation }) {
     
             if (response.status === 201) {
                 Alert.alert('성공', '공지사항이 성공적으로 업로드되었습니다.');
+                sendNotification(title, content);
                 navigation.navigate('NoticeList');
             } else {
                 Alert.alert('실패', '공지사항 업로드에 실패했습니다.');
