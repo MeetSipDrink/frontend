@@ -35,7 +35,7 @@ const ChatApp = () => {
     };
   }, []);
 
-  // Function to join the chat
+
   const joinChat = () => {
     if (stompClient && username.trim()) {
       stompClient.send('/chat.addUser', {}, JSON.stringify({
@@ -47,7 +47,7 @@ const ChatApp = () => {
     }
   };
 
-  // Function to send a message
+
   const sendMessage = () => {
     if (stompClient && message.trim()) {
       stompClient.send('/chat.sendMessage', {}, JSON.stringify({
@@ -56,7 +56,7 @@ const ChatApp = () => {
         type: 'CHAT', 
         chatRoomId
       }));
-      setMessage(''); // Clear the message input field
+      setMessage(''); 
     }
   };
 
