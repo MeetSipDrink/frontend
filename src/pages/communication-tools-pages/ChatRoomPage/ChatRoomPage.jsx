@@ -24,27 +24,44 @@ const ChatRoomPage = ({ chatRoomId, userNickname }) => {
             heartbeatOutgoing: 20000,
         });
 
+        let subscription;
+        const receivedMessages = new Set(); // 중복 메시지 방지를 위한 Set
+        
         client.onConnect = (frame) => {
             console.log('Connected: ' + frame);
             setStompClient(client);
             setConnectionStatus('Connected');
-            client.subscribe(`/topic/chatrooms/${chatRoomId}`, (message) => {
-                try {
-                    const msg = JSON.parse(message.body);
+        
+            // 기존 구독 해제
+            if (subscription) {
+                subscription.unsubscribe();
+            }
+        
+            // 새로운 구독 설정
+            subscription = client.subscribe(`/topic/chatrooms/${chatRoomId}`, (message) => {
+                const msg = JSON.parse(message.body);
+        
+                // 중복 메시지 필터링 (messageId 기반)
+                if (!receivedMessages.has(msg.messageId)) { // messageId 중복 검사
+                    receivedMessages.add(msg.messageId); // Set에 추가하여 중복 방지
                     setMessages((prevMessages) => [...prevMessages, msg]);
-                } catch (error) {
-                    console.error('Error parsing message:', error);
                 }
             });
-
-            // Send a message to notify that a new user has joined
+        
+            // 입장 알림 메시지 전송
             const joinMessage = {
                 sender: username,
                 content: `${username} has joined the chat`,
                 type: 'JOIN',
-                chatRoomId: chatRoomId,  // chatRoomId 추가
-                memberId: memberId,  // 로그인된 사용자의 ID 추가
+                chatRoomId: chatRoomId,
+                memberId: memberId,
             };
+            client.publish({
+                destination: '/app/chat.addUser',
+                body: JSON.stringify(joinMessage),
+            });
+        };
+            
             client.publish({
                 destination: '/app/chat.addUser',
                 body: JSON.stringify(joinMessage)
